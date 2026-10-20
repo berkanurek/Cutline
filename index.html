@@ -185,6 +185,49 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 2.125rem; line-heig
 .swap svg { width: 18px; height: 18px; }
 .swap.on { color: var(--diet); }
 .photo-row .t b { color: var(--habit); font-weight: 600; }
+.bar.over i { background: var(--train); }
+.kcal .extra { color: var(--train); }
+/* plan-dışı */
+.xrow .del, .stepper button { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--fg2); font-size: 1.25rem; line-height: 1; transition: background-color 0.15s ease, transform 0.1s ease-out; }
+.xrow .del:active, .stepper button:active { background: var(--fill); transform: scale(0.92); }
+.xrow .val { flex: none; font-weight: 600; font-size: 0.9375rem; }
+.xadd { padding: 12px 14px; display: grid; gap: 10px; position: relative; }
+.group .row + .xadd::before { content: ""; position: absolute; top: 0; right: 0; left: 14px; height: 1px; background: var(--sep); transform: scaleY(0.6); }
+.xinputs { display: grid; grid-template-columns: 1fr 76px 64px; gap: 8px; }
+.xinputs input { min-width: 0; height: 38px; border: 0; border-radius: 10px; background: var(--fill); padding: 0 10px; outline: none; font-variant-numeric: tabular-nums; }
+.xinputs input::placeholder { color: var(--fg2); }
+.xpre { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -2px; padding: 0 2px; }
+.xpre::-webkit-scrollbar { display: none; }
+.xpre button { flex: none; padding: 6px 10px; border-radius: 999px; background: var(--fill); font-size: 0.8125rem; font-weight: 600; white-space: nowrap; transition: transform 0.1s ease-out; }
+.xpre button:active { transform: scale(0.95); }
+.xpre button small { color: var(--fg2); font-weight: 500; }
+.xadd .btn { margin: 0; height: 42px; font-size: 0.9375rem; background: var(--fg); color: var(--bg); }
+/* su */
+.stepper { flex: none; display: flex; align-items: center; gap: 2px; }
+.stepper .n { min-width: 28px; text-align: center; font-weight: 700; }
+.glasses { display: flex; gap: 3px; flex-basis: 100%; padding: 6px 0 2px 36px; }
+.glasses i { width: 100%; max-width: 22px; height: 6px; border-radius: 3px; background: var(--track-habit); transition: background-color 0.2s ease; }
+.glasses i.on { background: var(--habit); }
+.water { flex-wrap: wrap; }
+.water .hit { margin-bottom: 0; padding-bottom: 2px; }
+/* kardiyo */
+.cardio { display: flex; gap: 8px; flex-basis: 100%; padding: 8px 0 2px 36px; }
+.cardio select, .cardio label { height: 34px; border-radius: 8px; background: var(--fill); border: 0; font-size: 0.875rem; font-weight: 600; color: var(--fg); }
+.cardio select { flex: 1; min-width: 0; padding: 0 8px; -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--fg2) 50%), linear-gradient(135deg, var(--fg2) 50%, transparent 50%); background-position: calc(100% - 14px) 15px, calc(100% - 9px) 15px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 24px; }
+.cardio label { display: flex; align-items: center; gap: 4px; padding: 0 8px; }
+.cardio input { width: 40px; border: 0; background: transparent; text-align: right; font-weight: 600; outline: none; padding: 0; }
+.cardio input::placeholder { color: var(--fg2); font-weight: 400; }
+.cardio label span { font-size: 0.8125rem; color: var(--fg2); font-weight: 500; }
+/* video */
+.vid { margin-left: auto; height: 30px; padding: 0 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 700; color: var(--fg2); text-decoration: none; background: transparent; box-shadow: inset 0 0 0 1.5px var(--fill); }
+.vid svg { width: 10px; height: 10px; fill: currentColor; }
+.vid:active { background: var(--fill); }
+/* ilerleme analizleri */
+.warn { margin-top: 10px; padding: 14px 16px; display: grid; gap: 6px; border-radius: 18px; background: var(--surface); box-shadow: inset 3px 0 0 var(--train); }
+.warn.ok { box-shadow: inset 3px 0 0 var(--diet); }
+.warn b { font-size: 0.9375rem; }
+.warn p { margin: 0; font-size: 0.875rem; color: var(--fg2); }
+.chart .pick { margin: 0 4px 8px; width: calc(100% - 8px); height: 36px; border-radius: 10px; border: 0; background: var(--fill); padding: 0 28px 0 10px; font-weight: 600; color: var(--fg); -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--fg2) 50%), linear-gradient(135deg, var(--fg2) 50%, transparent 50%); background-position: calc(100% - 16px) 16px, calc(100% - 11px) 16px; background-size: 5px 5px; background-repeat: no-repeat; }
 
 .foot { margin: 28px 4px 0; font-size: 0.75rem; color: var(--fg2); text-align: center; }
 .toast { position: fixed; left: 50%; top: calc(64px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -20px); opacity: 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 0.875rem; font-weight: 600; transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.25s ease; z-index: 20; max-width: calc(100% - 32px); pointer-events: none; }
@@ -211,7 +254,7 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 2.125rem; line-heig
 .stat .v small { font-size: 1rem; font-weight: 500; color: var(--fg2); letter-spacing: 0; }
 .stat .d { font-size: 0.8125rem; color: var(--fg2); }
 .stat .d b { color: var(--diet); font-weight: 600; }
-.weekcard { margin-top: 10px; padding: 14px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.weekcard { margin-top: 10px; padding: 14px 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 8px; }
 .weekcard .k { font-size: 0.8125rem; font-weight: 600; }
 .weekcard .v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
 .weekcard .v small { font-size: 0.9375rem; color: var(--fg2); font-weight: 500; }
@@ -298,7 +341,7 @@ details.more summary::-webkit-details-marker { display: none; }
       <div class="legend">
         <div><div class="leg-label c-diet">Diyet</div><div class="leg-val" id="lv-diet">0<small>/13</small></div></div>
         <div><div class="leg-label c-train">Antrenman</div><div class="leg-val" id="lv-train">0<small>/8</small></div></div>
-        <div><div class="leg-label c-habit">Alışkanlık</div><div class="leg-val" id="lv-habit">0<small>/2</small></div></div>
+        <div><div class="leg-label c-habit">Alışkanlık</div><div class="leg-val" id="lv-habit">0<small>/3</small></div></div>
       </div>
     </div>
 
@@ -327,10 +370,12 @@ details.more summary::-webkit-details-marker { display: none; }
   <section id="view-ilerleme" role="tabpanel" aria-labelledby="tab-ilerleme" hidden>
     <header class="dayhead"><div><p class="eyebrow">Boy 188 cm · Bel hedefi 94 cm</p><h1>İlerleme</h1></div></header>
     <div class="stats" id="stats"></div>
+    <div id="plateau"></div>
     <div class="card weekcard" id="weekcard"></div>
     <div class="group habit" id="photocard" style="margin-top:10px"></div>
     <div class="card chart" id="chart-w"></div>
     <div class="card chart" id="chart-b"></div>
+    <div class="card chart" id="chart-s"></div>
 
     <h2 class="sect">Ölçüm ekle <span id="lastmeasure"></span></h2>
     <form class="group" id="form" novalidate>
@@ -450,6 +495,10 @@ details.more summary::-webkit-details-marker { display: none; }
       "aksam:1": ["50 gr kırmızı mercimek", "50 gr barbunya"],
       "aksam:2": ["300 gr tatlı patates", "75 gr pirinç"]
     },
+    water: { goal: 10, ml: 250 },
+    cardioTypes: ["Eğimli yürüyüş", "Bisiklet", "Eliptik", "Merdiven", "Kürek", "Koşu", "Diğer"],
+    // Plan dışı hızlı seçenekler (yaklaşık değerler)
+    presets: [["Kola 330 ml", 140, 0], ["Bira 0,5 L", 215, 2], ["Pizza 1 dilim", 285, 12], ["Dürüm döner", 650, 35], ["Simit", 300, 9], ["Çikolata 50 g", 270, 4], ["Muz", 105, 1], ["Elma", 95, 0]],
     // JS getDay(): 0 Pazar … 6 Cumartesi
     schedule: { 2: "gogus", 3: "sirt", 4: "bacak", 5: "rest", 6: "ust", 0: "kardiyo", 1: "rest" },
     habits: [
@@ -565,9 +614,13 @@ details.more summary::-webkit-details-marker { display: none; }
     const plan = planFor(wday(date));
     let wt = 0, wdone = 0;
     if (plan) { const ex = plan.ex.map(exInfo); wt = ex.length; wdone = ex.filter(i => exDone(day.workout, i)).length; }
-    const hd = PLAN.habits.filter(h => day.habits && day.habits[h[0]]).length;
-    return { dc, wt, wdone, hd, plan, diet: dc / DIET_TOTAL, train: plan ? wdone / wt : 0, habit: hd / PLAN.habits.length };
+    const hd = habitsDone(day);
+    return { dc, wt, wdone, hd, plan, diet: dc / DIET_TOTAL, train: plan ? wdone / wt : 0, habit: hd / HABIT_TOTAL };
   }
+  const HABIT_TOTAL = 3;
+  const waterOk = day => (day.water || 0) >= PLAN.water.goal;
+  function habitsDone(day) { return PLAN.habits.filter(h => day.habits && day.habits[h[0]]).length + (waterOk(day) ? 1 : 0); }
+  function cardioMinutes(day) { const c = day.workout && day.workout.cardio; return c && c.min ? c.min : 0; }
   function streak() {
     let n = 0, d = today();
     if (!dietComplete(getDay(d))) d = addDays(d, -1);
@@ -609,7 +662,7 @@ details.more summary::-webkit-details-marker { display: none; }
     setRing($("ring-diet"), f.diet, 58); setRing($("ring-train"), f.train, 43); setRing($("ring-habit"), f.habit, 28);
     $("lv-diet").innerHTML = f.dc + "<small>/" + DIET_TOTAL + "</small>";
     $("lv-train").innerHTML = f.plan ? f.wdone + "<small>/" + f.wt + "</small>" : "Dinlenme";
-    $("lv-habit").innerHTML = f.hd + "<small>/" + PLAN.habits.length + "</small>";
+    $("lv-habit").innerHTML = f.hd + "<small>/" + HABIT_TOTAL + "</small>";
 
     const sum = { k: 0, p: 0, c: 0, f: 0 };
     PLAN.meals.forEach(m => {
@@ -617,10 +670,13 @@ details.more summary::-webkit-details-marker { display: none; }
       const fr = got / m.items.length;
       ["k", "p", "c", "f"].forEach(x => sum[x] += m.m[x] * fr);
     });
+    let xk = 0;
+    (day.extras || []).forEach(x => { xk += x.kcal || 0; sum.k += x.kcal || 0; sum.p += x.p || 0; });
     const T = PLAN.target;
-    $("kcal").textContent = Math.round(sum.k).toLocaleString("tr-TR") + " kcal";
-    $("kcal-goal").textContent = "hedef " + T.k.toLocaleString("tr-TR") + " kcal";
+    $("kcal").innerHTML = Math.round(sum.k).toLocaleString("tr-TR") + " kcal" + (xk ? ' <span class="extra" style="font-size:0.8125rem;font-weight:600">+' + Math.round(xk).toLocaleString("tr-TR") + ' plan dışı</span>' : "");
+    $("kcal-goal").textContent = sum.k > T.k ? Math.round(sum.k - T.k).toLocaleString("tr-TR") + " kcal fazla" : "hedef " + T.k.toLocaleString("tr-TR") + " kcal";
     $("kcal-bar").style.width = Math.min(100, sum.k / T.k * 100) + "%";
+    $("kcal-bar").parentNode.classList.toggle("over", sum.k > T.k);
     $("m-p").textContent = Math.round(sum.p) + " / " + T.p + " g";
     $("m-c").textContent = Math.round(sum.c) + " / " + T.c + " g";
     $("m-f").textContent = Math.round(sum.f) + " / " + T.f + " g";
@@ -659,7 +715,14 @@ details.more summary::-webkit-details-marker { display: none; }
     if (!info.cardio) {
       extra += '<div class="sets" role="group" aria-label="' + esc(info.name) + ' setleri">';
       for (let i = 0; i < info.mx; i++) extra += '<button class="dot' + (i >= info.mn ? " opt" : "") + '" type="button" data-exi="' + idx + '" data-set="' + (i + 1) + '" aria-pressed="' + (i < n) + '" aria-label="' + (i + 1) + '. set' + (i >= info.mn ? " (isteğe bağlı)" : "") + '">' + (i + 1) + '</button>';
+      extra += '<a class="vid" href="https://www.youtube.com/results?search_query=' + encodeURIComponent(info.name + " proper form") + '" target="_blank" rel="noopener" aria-label="' + esc(info.name) + ' form videosu"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z"/></svg>Form</a>';
       extra += "</div>";
+    } else {
+      const c = (w && w.cardio) || {};
+      const planned = (info.sets.match(/\d+/g) || []).pop();
+      extra += '<div class="cardio"><select id="ctype" data-ctype="1" aria-label="Kardiyo türü">' +
+        PLAN.cardioTypes.map(t => '<option' + ((c.type || PLAN.cardioTypes[0]) === t ? " selected" : "") + '>' + esc(t) + '</option>').join("") + '</select>' +
+        '<label for="cmin"><input id="cmin" data-cmin="' + idx + '" inputmode="numeric" value="' + (c.min || "") + '" placeholder="' + (planned || "") + '" aria-label="Kardiyo süresi"><span>dk</span></label></div>';
     }
     return rowHtml('data-exi="' + idx + '" data-exrow="1"', done, info.name, sub, extra, "ex");
   }
@@ -693,6 +756,14 @@ details.more summary::-webkit-details-marker { display: none; }
       }).join("") + '</div>';
     }).join("");
 
+    const ex = day.extras || [];
+    $("diet").insertAdjacentHTML("beforeend",
+      '<div class="sub"><span>Plan dışı' + (ex.length ? ' · ' + ex.reduce((a, x) => a + (x.kcal || 0), 0).toLocaleString("tr-TR") + ' kcal' : "") + '</span></div>' +
+      '<div class="group">' + ex.map(x => '<div class="row xrow"><span class="txt"><span class="t" style="display:block">' + esc(x.name) + '</span>' + (x.p ? '<span class="s" style="display:block">' + x.p + ' g protein</span>' : "") + '</span><span class="val">' + x.kcal.toLocaleString("tr-TR") + ' kcal</span><button class="del" type="button" data-delx="' + x.id + '" aria-label="' + esc(x.name) + ' sil">×</button></div>').join("") +
+      '<div class="xadd"><div class="xpre" aria-label="Hızlı seçenekler">' + PLAN.presets.map((pr, i) => '<button type="button" data-pre="' + i + '">' + esc(pr[0]) + ' <small>' + pr[1] + '</small></button>').join("") + '</div>' +
+      '<div class="xinputs"><input id="x-name" placeholder="Ne yedin?" aria-label="Yemek adı" autocomplete="off"><input id="x-kcal" inputmode="numeric" placeholder="kcal" aria-label="Kalori"><input id="x-p" inputmode="numeric" placeholder="prot." aria-label="Protein gram"></div>' +
+      '<button class="btn" type="button" data-addx="1">Ekle</button></div></div>');
+
     const wd = wday(date), sch = scheduled(date);
     $("wdays").innerHTML = PLAN.days.map(d => '<button class="chip" type="button" data-wday="' + d.id + '" aria-pressed="' + (wd === d.id) + '">' + esc(d.name) + (d.id === sch ? ' <small>plan</small>' : "") + '</button>').join("") +
       '<button class="chip" type="button" data-wday="rest" aria-pressed="' + (wd === "rest") + '">Dinlenme' + (sch === "rest" ? ' <small>plan</small>' : "") + '</button>';
@@ -710,7 +781,12 @@ details.more summary::-webkit-details-marker { display: none; }
     }
     const mk = date.slice(0, 7), photos = state.progress.photos || {};
     const photoDay = parseDs(date).getDate() <= 3 && (!photos[mk] || photos[mk] === date);
-    $("habits").innerHTML = PLAN.habits.map(h => rowHtml('data-habit="' + h[0] + '"', day.habits && day.habits[h[0]], h[1], esc(h[2]))).join("") +
+    const wn = day.water || 0, G = PLAN.water.goal;
+    const waterRow = '<div class="row water"><button class="hit" type="button" role="checkbox" aria-checked="' + (wn >= G) + '" data-water="1" aria-label="Bir bardak su ekle">' +
+      '<span class="chk">' + CHECK + '</span><span class="txt"><span class="t" style="display:block">Su ' + (G * PLAN.water.ml / 1000).toLocaleString("tr-TR") + ' L</span><span class="s" style="display:block">' + wn + ' / ' + G + ' bardak · ' + (wn * PLAN.water.ml / 1000).toLocaleString("tr-TR") + ' L</span></span></button>' +
+      '<div class="stepper"><button type="button" data-waterdown="1" aria-label="Bir bardak çıkar">−</button><span class="n">' + wn + '</span><button type="button" data-water="1" aria-label="Bir bardak ekle">+</button></div>' +
+      '<div class="glasses" aria-hidden="true">' + Array.from({ length: G }, (_, i) => '<i' + (i < wn ? ' class="on"' : "") + '></i>').join("") + '</div></div>';
+    $("habits").innerHTML = PLAN.habits.map(h => rowHtml('data-habit="' + h[0] + '"', day.habits && day.habits[h[0]], h[1], esc(h[2]))).join("") + waterRow +
       (photoDay ? rowHtml('data-photo="' + date + '"', !!photos[mk], "Aylık fotoğraf", "Ön, yan, arka · aynı yer, aynı ışık", "", "photo-row") : "");
     updateSummary();
     requestAnimationFrame(() => { const box = $("wdays"), c = box.querySelector('.chip[aria-pressed="true"]'); if (c && !box.hidden) box.scrollLeft = c.offsetLeft - (box.clientWidth - c.offsetWidth) / 2; });
@@ -769,16 +845,44 @@ details.more summary::-webkit-details-marker { display: none; }
       photos[mk] ? "Çekildi · sıradaki " + fmtLong(nextFirst) : "Ön, yan, arka · her ayın ilk günlerinde", "", "photo-row");
 
     const ws = weekStart(today()), t = today();
-    let tr = 0, dt = 0, hb = 0, n = 0;
+    let tr = 0, dt = 0, hb = 0, n = 0, cm = 0;
     for (let i = 0; i < 7; i++) {
       const d = addDays(ws, i); if (d > t) break; n++;
       const day = getDay(d); if (trained(day)) tr++; if (dietComplete(day)) dt++;
-      if (PLAN.habits.every(h => day.habits && day.habits[h[0]])) hb++;
+      if (habitsDone(day) === HABIT_TOTAL) hb++;
+      cm += cardioMinutes(day);
     }
     $("weekcard").innerHTML = '<div class="weekhead">Bu hafta · ' + fmtShort(ws) + ' – ' + fmtShort(addDays(ws, 6)) + '</div>' +
       '<div><div class="k c-train">Antrenman</div><div class="v">' + tr + '<small>/5</small></div></div>' +
       '<div><div class="k c-diet">Tam diyet</div><div class="v">' + dt + '<small>/' + n + '</small></div></div>' +
-      '<div><div class="k c-habit">Alışkanlık</div><div class="v">' + hb + '<small>/' + n + '</small></div></div>';
+      '<div><div class="k c-habit">Tüm alışkanlıklar</div><div class="v">' + hb + '<small>/' + n + '</small></div></div>' +
+      '<div><div class="k c-train">Kardiyo</div><div class="v">' + cm + '<small> dk</small></div></div>';
+
+    // trend: last 7 days vs the 7 before
+    const avgOf = a => a.reduce((x, p) => x + p.v, 0) / a.length;
+    const t7 = addDays(t, -6), t14 = addDays(t, -13);
+    const A = w.filter(p => p.d >= t7), B = w.filter(p => p.d >= t14 && p.d < t7);
+    let warn = "";
+    if (A.length >= 2 && B.length >= 2) {
+      const diff = avgOf(A) - avgOf(B);
+      if (diff > -0.2) warn = '<div class="warn"><b>Kilo 2 haftadır yerinde sayıyor</b><p>Son 7 günün ortalaması önceki haftayla neredeyse aynı (' + (diff >= 0 ? "+" : "") + fmtNum(diff) + ' kg). Bel ölçün düşüyorsa sorun yok, su tutulması olabilir. Bel de aynıysa bu hafta iki şeyden birini yap: günlük adımı 2.000 artır ya da akşam patatesini 150 g azalt (yaklaşık 130 kcal).</p></div>';
+      else if (diff < -1.2) warn = '<div class="warn"><b>Çok hızlı düşüyorsun</b><p>Haftalık ortalaman ' + fmtNum(-diff) + ' kg düştü. İlk 2 hafta su kaybı yüzünden bu normal. Sonrasında da sürerse ve antrenmanda güç düşüyorsa günde 150 kcal ekle, örneğin akşam patatesini 150 g artır.</p></div>';
+      else warn = '<div class="warn ok"><b>Doğru hızdasın</b><p>Haftalık ortalaman ' + fmtNum(-diff) + ' kg düştü. Haftada 0,5–1 kg ideal aralık.</p></div>';
+    }
+    $("plateau").innerHTML = warn;
+
+    // strength chart
+    const hist = {};
+    Object.keys(state.days).sort().forEach(d => { const kg = state.days[d].workout && state.days[d].workout.kg; if (kg) Object.keys(kg).forEach(k => { (hist[k] = hist[k] || []).push({ d: d, v: kg[k] }); }); });
+    const names = Object.keys(hist).sort((a, b) => hist[b].length - hist[a].length || a.localeCompare(b));
+    if (!names.length) $("chart-s").innerHTML = '<h3>Güç <span>kg</span></h3><div class="empty">Antrenmanda kaldırdığın kiloları girdikçe her hareketin grafiği burada oluşur.</div>';
+    else {
+      if (!state.strength || !hist[state.strength]) state.strength = names[0];
+      const pts = hist[state.strength], first = pts[0].v, lastv = pts[pts.length - 1].v;
+      $("chart-s").innerHTML = '<h3>Güç <span>' + (pts.length > 1 ? (lastv >= first ? "+" : "") + fmtNum(lastv - first) + " kg ilk kayıttan" : "ilk kayıt") + '</span></h3>' +
+        '<select class="pick" id="pick-s" aria-label="Hareket seç">' + names.map(nm => '<option' + (nm === state.strength ? " selected" : "") + '>' + esc(nm) + '</option>').join("") + '</select>' +
+        chartSvg(pts, "var(--train)", "Güç");
+    }
 
     $("chart-w").innerHTML = '<h3>Kilo <span>kg</span></h3>' + (state.progressLoaded ? chartSvg(w, "var(--train)", "Kilo") : '<div class="empty">Yükleniyor…</div>');
     $("chart-b").innerHTML = '<h3>Bel <span>cm · kesikli çizgi 94 cm hedef</span></h3>' + (state.progressLoaded ? chartSvg(b, "var(--diet)", "Bel", PLAN.waistGoal) : '<div class="empty">Yükleniyor…</div>');
@@ -897,6 +1001,28 @@ details.more summary::-webkit-details-marker { display: none; }
       touch(date); renderToday(); return;
     }
     if (t.dataset.photo) { togglePhoto(t.dataset.photo); return; }
+    if (t.dataset.water || t.dataset.waterdown) {
+      const d = ensureDay(date), G = PLAN.water.goal;
+      d.water = Math.max(0, Math.min(20, (d.water || 0) + (t.dataset.waterdown ? -1 : 1)));
+      touch(date); renderToday();
+      if (!t.dataset.waterdown && d.water === G) toast("Su hedefi tamam");
+      return;
+    }
+    if (t.dataset.pre != null) {
+      const pr = PLAN.presets[+t.dataset.pre];
+      $("x-name").value = pr[0]; $("x-kcal").value = pr[1]; $("x-p").value = pr[2] || ""; return;
+    }
+    if (t.dataset.addx) {
+      const name = $("x-name").value.trim(), kc = Math.round(num($("x-kcal").value) || 0), pr = Math.round(num($("x-p").value) || 0);
+      if (!name || !kc) { toast(!name ? "Ne yediğini yaz" : "Kalorisini yaz, tahmini de olur"); (!name ? $("x-name") : $("x-kcal")).focus(); return; }
+      const d = ensureDay(date); d.extras = (d.extras || []).concat([{ id: Date.now().toString(36), name: name.slice(0, 60), kcal: kc, p: pr || 0 }]);
+      if (document.activeElement) document.activeElement.blur();
+      touch(date); renderToday(); toast(name + " eklendi"); return;
+    }
+    if (t.dataset.delx) {
+      const d = ensureDay(date); d.extras = (d.extras || []).filter(x => x.id !== t.dataset.delx);
+      touch(date); renderToday(); return;
+    }
     if (t.dataset.diet) {
       const d = ensureDay(date); d.diet[t.dataset.diet] = !d.diet[t.dataset.diet]; flip(t, d.diet[t.dataset.diet]); touch(date); updateSummary();
     } else if (t.dataset.meal) {
@@ -927,8 +1053,20 @@ details.more summary::-webkit-details-marker { display: none; }
       if (open) { const box = $("wdays"), c = box.querySelector('.chip[aria-pressed="true"]'); if (c) box.scrollLeft = c.offsetLeft - (box.clientWidth - c.offsetWidth) / 2; }
     }
   });
+  $("view-bugun").addEventListener("change", ev => {
+    const el = ev.target; if (!el.dataset || !el.dataset.ctype || state.readOnly) return;
+    const d = ensureDay(state.date); d.workout.cardio = Object.assign({}, d.workout.cardio, { type: el.value }); touch(state.date);
+  });
   $("view-bugun").addEventListener("input", ev => {
-    const el = ev.target; if (!el.dataset || el.dataset.kg == null || state.readOnly) return;
+    const el = ev.target;
+    if (el.dataset && el.dataset.cmin != null && !state.readOnly) {
+      const date = state.date, d = ensureDay(date), v = Math.round(num(el.value) || 0);
+      d.workout.cardio = Object.assign({ type: PLAN.cardioTypes[0] }, d.workout.cardio, { min: v || 0 });
+      const info = currentPlanEx(date)[+el.dataset.cmin];
+      if (info && v > 0 && setsDone(d.workout, info) < 1) { d.workout.sets[info.name] = 1; paintEx(+el.dataset.cmin, info, d.workout); updateSummary(); }
+      touch(date, 700); return;
+    }
+    if (!el.dataset || el.dataset.kg == null || state.readOnly) return;
     const date = state.date, info = currentPlanEx(date)[+el.dataset.kg]; if (!info) return;
     const d = ensureDay(date);
     const v = num(el.value);
@@ -936,6 +1074,7 @@ details.more summary::-webkit-details-marker { display: none; }
     touch(date, 700);
   });
 
+  $("view-bugun").addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.closest && ev.target.closest(".xinputs")) { ev.preventDefault(); const b = document.querySelector("[data-addx]"); if (b) b.click(); } });
   $("f-date").value = today();
   $("save").addEventListener("click", () => {
     if (state.readOnly) return;
@@ -961,6 +1100,7 @@ details.more summary::-webkit-details-marker { display: none; }
     renderToday(); renderProgress();
     if (ph[mk]) toast("Bu ayın fotoğrafı işaretlendi");
   }
+  $("view-ilerleme").addEventListener("change", ev => { if (ev.target.id === "pick-s") { state.strength = ev.target.value; renderProgress(); } });
   $("photocard").addEventListener("click", ev => { const b = ev.target.closest("[data-photo]"); if (b) togglePhoto(b.dataset.photo); });
   $("entries").addEventListener("click", ev => {
     const b = ev.target.closest("[data-del]"); if (!b || state.readOnly) return;
