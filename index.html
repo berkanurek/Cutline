@@ -180,6 +180,11 @@ h1 { margin: 0; font-family: var(--font-display); font-size: 2.125rem; line-heig
 .linkbtn { display: block; margin: 10px 4px 0; color: var(--fg2); font-size: 0.875rem; font-weight: 500; }
 .linkbtn b { color: var(--train); font-weight: 600; }
 .txt .s .up { color: var(--diet); }
+.swap { flex: none; width: 34px; height: 34px; margin-right: -6px; border-radius: 10px; display: grid; place-items: center; color: var(--fg2); transition: background-color 0.15s ease, transform 0.1s ease-out; }
+.swap:active { background: var(--fill); transform: scale(0.92); }
+.swap svg { width: 18px; height: 18px; }
+.swap.on { color: var(--diet); }
+.photo-row .t b { color: var(--habit); font-weight: 600; }
 
 .foot { margin: 28px 4px 0; font-size: 0.75rem; color: var(--fg2); text-align: center; }
 .toast { position: fixed; left: 50%; top: calc(64px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -20px); opacity: 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 0.875rem; font-weight: 600; transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.25s ease; z-index: 20; max-width: calc(100% - 32px); pointer-events: none; }
@@ -323,10 +328,11 @@ details.more summary::-webkit-details-marker { display: none; }
     <header class="dayhead"><div><p class="eyebrow">Boy 188 cm · Bel hedefi 94 cm</p><h1>İlerleme</h1></div></header>
     <div class="stats" id="stats"></div>
     <div class="card weekcard" id="weekcard"></div>
+    <div class="group habit" id="photocard" style="margin-top:10px"></div>
     <div class="card chart" id="chart-w"></div>
     <div class="card chart" id="chart-b"></div>
 
-    <h2 class="sect">Ölçüm ekle</h2>
+    <h2 class="sect">Ölçüm ekle <span id="lastmeasure"></span></h2>
     <form class="group" id="form" novalidate>
       <div class="field"><label for="f-date">Tarih</label><input id="f-date" type="date"></div>
       <div class="field"><label for="f-weight">Kilo</label><input id="f-weight" inputmode="decimal" placeholder="kg"></div>
@@ -436,6 +442,14 @@ details.more summary::-webkit-details-marker { display: none; }
         ["Kardiyo", "20 dk", "", null, true, true]
       ]}
     ],
+    // Yaklaşık aynı makrolu değişimler (çiğ ağırlıklar)
+    alts: {
+      "ogle:0": ["250 gr hindi göğüs", "220 gr ton balığı (suda, süzülmüş)"],
+      "ogle:1": ["100 gr bulgur", "100 gr tam buğday makarna"],
+      "aksam:0": ["150 gr hindi kıyma", "150 gr dana bonfile"],
+      "aksam:1": ["50 gr kırmızı mercimek", "50 gr barbunya"],
+      "aksam:2": ["300 gr tatlı patates", "75 gr pirinç"]
+    },
     // JS getDay(): 0 Pazar … 6 Cumartesi
     schedule: { 2: "gogus", 3: "sirt", 4: "bacak", 5: "rest", 6: "ust", 0: "kardiyo", 1: "rest" },
     habits: [
@@ -670,7 +684,13 @@ details.more summary::-webkit-details-marker { display: none; }
       const tag = isNow ? '<span class="tag">Şimdi</span>' : (m.id === nextId && !all ? '<span class="tag next">Sıradaki</span>' : "");
       const head = '<div class="sub"><span>' + esc(m.name) + ' · <span class="tm">' + m.time[0] + '–' + m.time[1] + '</span> · ' + kc + tag + '</span>' +
         (m.items.length > 1 ? '<button type="button" data-meal="' + m.id + '">' + (all ? "Temizle" : "Tümü") + '</button>' : "") + '</div>';
-      return head + (m.tip ? '<p class="mealtip">' + esc(m.tip) + '</p>' : "") + '<div class="group">' + m.items.map((it, i) => rowHtml('data-diet="' + m.id + ":" + i + '"', day.diet && day.diet[m.id + ":" + i], it)).join("") + '</div>';
+      return head + (m.tip ? '<p class="mealtip">' + esc(m.tip) + '</p>' : "") + '<div class="group">' + m.items.map((it, i) => {
+        const key = m.id + ":" + i, alts = PLAN.alts[key], si = (day.swap && day.swap[key]) || 0;
+        const label = si && alts && alts[si - 1] ? alts[si - 1] : it;
+        const sub = si ? "Değişim · plandaki: " + esc(it) : "";
+        const btn = alts ? '<button class="swap' + (si ? " on" : "") + '" type="button" data-swap="' + key + '" aria-label="' + esc(it) + ' için alternatif seç"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11l-3-3M16 13H5l3 3"/></svg></button>' : "";
+        return rowHtml('data-diet="' + key + '"', day.diet && day.diet[key], label, sub, btn);
+      }).join("") + '</div>';
     }).join("");
 
     const wd = wday(date), sch = scheduled(date);
@@ -688,7 +708,10 @@ details.more summary::-webkit-details-marker { display: none; }
       const w = day.workout;
       $("workout").innerHTML = '<div class="group">' + plan.ex.map((e, idx) => exRow(exInfo(e), idx, w, date)).join("") + '</div>';
     }
-    $("habits").innerHTML = PLAN.habits.map(h => rowHtml('data-habit="' + h[0] + '"', day.habits && day.habits[h[0]], h[1], esc(h[2]))).join("");
+    const mk = date.slice(0, 7), photos = state.progress.photos || {};
+    const photoDay = parseDs(date).getDate() <= 3 && (!photos[mk] || photos[mk] === date);
+    $("habits").innerHTML = PLAN.habits.map(h => rowHtml('data-habit="' + h[0] + '"', day.habits && day.habits[h[0]], h[1], esc(h[2]))).join("") +
+      (photoDay ? rowHtml('data-photo="' + date + '"', !!photos[mk], "Aylık fotoğraf", "Ön, yan, arka · aynı yer, aynı ışık", "", "photo-row") : "");
     updateSummary();
     requestAnimationFrame(() => { const box = $("wdays"), c = box.querySelector('.chip[aria-pressed="true"]'); if (c && !box.hidden) box.scrollLeft = c.offsetLeft - (box.clientWidth - c.offsetWidth) / 2; });
   }
@@ -731,7 +754,19 @@ details.more summary::-webkit-details-marker { display: none; }
     };
     const lastWaist = b.length ? b[b.length - 1].v : null;
     const ratio = lastWaist ? "Bel/boy " + fmtNum(lastWaist / PLAN.height, 2) + " · hedef 0,50" : "";
-    $("stats").innerHTML = stat("Kilo", w, "kg") + stat("Bel", b, "cm", ratio);
+    const since = addDays(today(), -6), recent = w.filter(p => p.d >= since);
+    const avg = recent.length >= 2 ? "7 gün ort. " + fmtNum(recent.reduce((a, p) => a + p.v, 0) / recent.length) + " kg" : "";
+    $("stats").innerHTML = stat("Kilo", w, "kg", avg) + stat("Bel", b, "cm", ratio);
+    const all = (state.progress.entries || []).map(e => e.date).sort();
+    if (all.length) {
+      const ago = Math.round((parseDs(today()) - parseDs(all[all.length - 1])) / 86400000);
+      $("lastmeasure").textContent = ago <= 0 ? "bugün ölçtün" : ago === 1 ? "son ölçüm dün" : "son ölçüm " + ago + " gün önce";
+    } else $("lastmeasure").textContent = "";
+    const mk = today().slice(0, 7), photos = state.progress.photos || {};
+    const monthName = parseDs(today()).toLocaleDateString("tr-TR", { month: "long" });
+    const nextFirst = (() => { const d = parseDs(today()); d.setMonth(d.getMonth() + 1, 1); return ds(d); })();
+    $("photocard").innerHTML = rowHtml('data-photo="' + today() + '"', !!photos[mk], "Aylık fotoğraf · " + monthName.charAt(0).toUpperCase() + monthName.slice(1),
+      photos[mk] ? "Çekildi · sıradaki " + fmtLong(nextFirst) : "Ön, yan, arka · her ayın ilk günlerinde", "", "photo-row");
 
     const ws = weekStart(today()), t = today();
     let tr = 0, dt = 0, hb = 0, n = 0;
@@ -855,6 +890,13 @@ details.more summary::-webkit-details-marker { display: none; }
     if (t.dataset.date) { state.date = t.dataset.date; renderToday(); return; }
     if (state.readOnly) return;
     const date = state.date;
+    if (t.dataset.swap) {
+      const d = ensureDay(date), key = t.dataset.swap, n = PLAN.alts[key].length;
+      d.swap = d.swap || {}; d.swap[key] = (((d.swap[key] || 0) + 1) % (n + 1));
+      if (!d.swap[key]) delete d.swap[key];
+      touch(date); renderToday(); return;
+    }
+    if (t.dataset.photo) { togglePhoto(t.dataset.photo); return; }
     if (t.dataset.diet) {
       const d = ensureDay(date); d.diet[t.dataset.diet] = !d.diet[t.dataset.diet]; flip(t, d.diet[t.dataset.diet]); touch(date); updateSummary();
     } else if (t.dataset.meal) {
@@ -904,16 +946,26 @@ details.more summary::-webkit-details-marker { display: none; }
     const i = entries.findIndex(x => x.date === e.date);
     if (i >= 0) entries[i] = Object.assign({}, entries[i], e); else entries.push(e);
     entries.sort((a, b) => a.date < b.date ? -1 : 1);
-    state.progress = { entries: entries }; state.progressLoaded = true;
+    state.progress = Object.assign({}, state.progress, { entries: entries }); state.progressLoaded = true;
     queueWrite("progress/log", () => state.progress, 0);
     ["f-weight", "f-waist", "f-chest", "f-shoulder", "f-hip", "f-thigh"].forEach(id => $(id).value = "");
     if (document.activeElement) document.activeElement.blur();
     renderProgress(); toast("Ölçüm kaydedildi");
   });
+  function togglePhoto(date) {
+    if (state.readOnly) return;
+    const mk = date.slice(0, 7), ph = Object.assign({}, state.progress.photos || {});
+    if (ph[mk]) delete ph[mk]; else ph[mk] = date;
+    state.progress = Object.assign({}, state.progress, { photos: ph }); state.progressLoaded = true;
+    queueWrite("progress/log", () => state.progress, 0);
+    renderToday(); renderProgress();
+    if (ph[mk]) toast("Bu ayın fotoğrafı işaretlendi");
+  }
+  $("photocard").addEventListener("click", ev => { const b = ev.target.closest("[data-photo]"); if (b) togglePhoto(b.dataset.photo); });
   $("entries").addEventListener("click", ev => {
     const b = ev.target.closest("[data-del]"); if (!b || state.readOnly) return;
     if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Emin misin?"; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ""; b.textContent = "Sil"; } }, 3000); return; }
-    state.progress = { entries: (state.progress.entries || []).filter(x => x.date !== b.dataset.del) };
+    state.progress = Object.assign({}, state.progress, { entries: (state.progress.entries || []).filter(x => x.date !== b.dataset.del) });
     queueWrite("progress/log", () => state.progress, 0);
     renderProgress(); toast("Ölçüm silindi");
   });
