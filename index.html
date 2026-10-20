@@ -296,19 +296,19 @@ details.more summary::-webkit-details-marker { display: none; }
         <circle class="p" id="ring-habit" cx="66" cy="66" r="28" style="stroke: var(--habit)"/>
       </svg>
       <div class="legend">
-        <div><div class="leg-label c-diet">Diyet</div><div class="leg-val" id="lv-diet">0<small>/11</small></div></div>
+        <div><div class="leg-label c-diet">Diyet</div><div class="leg-val" id="lv-diet">0<small>/13</small></div></div>
         <div><div class="leg-label c-train">Antrenman</div><div class="leg-val" id="lv-train">0<small>/8</small></div></div>
         <div><div class="leg-label c-habit">Alışkanlık</div><div class="leg-val" id="lv-habit">0<small>/2</small></div></div>
       </div>
     </div>
 
     <div class="card macros">
-      <div class="kcal"><b id="kcal">0 kcal</b><span id="kcal-goal">hedef 2.045 kcal</span></div>
+      <div class="kcal"><b id="kcal">0 kcal</b><span id="kcal-goal">hedef 2.075 kcal</span></div>
       <div class="bar"><i id="kcal-bar"></i></div>
       <div class="mrow">
-        <div>Protein<b id="m-p">0 / 143 g</b></div>
-        <div>Karbonhidrat<b id="m-c">0 / 159 g</b></div>
-        <div>Yağ<b id="m-f">0 / 86 g</b></div>
+        <div>Protein<b id="m-p">0 / 158 g</b></div>
+        <div>Karbonhidrat<b id="m-c">0 / 176 g</b></div>
+        <div>Yağ<b id="m-f">0 / 74 g</b></div>
       </div>
     </div>
 
@@ -380,14 +380,14 @@ details.more summary::-webkit-details-marker { display: none; }
 <script>
 (function () {
   const PLAN = {
-    target: { k: 2045, p: 143, c: 159, f: 86 },
+    target: { k: 2075, p: 158, c: 176, f: 74 },
     meals: [
-      { id: "ogle", name: "Öğle", time: ["12:00", "13:00"], m: { p: 63.38, c: 79.995, f: 27.41, k: 843.5 },
-        items: ["250 gr tavuk göğüs", "100 gr basmati pirinç", "1 porsiyon yeşillik ve sebze", "1,5 yemek kaşığı zeytinyağı"] },
+      { id: "ogle", name: "Öğle", time: ["12:00", "13:00"], m: { p: 71.18, c: 88.8, f: 21.31, k: 858.5 },
+        items: ["250 gr tavuk göğüs", "100 gr basmati pirinç", "1 porsiyon yeşillik ve sebze", "0,5 yemek kaşığı zeytinyağı", "200 gr Hollandia Selský yoğurt"] },
       { id: "ara1", name: "Yeşil çay", time: ["15:00", "16:00"], tip: "Yemekten en az 1 saat uzak iç, demirin emilimini engellemesin.", m: { p: 0, c: 0, f: 0, k: 0 }, items: ["1 bardak yeşil çay"] },
       { id: "ara2", name: "Protein", time: ["17:30", "18:30"], tip: "Antrenman günü antrenmandan hemen sonra iç; saat kayabilir.", m: { p: 24, c: 3, f: 2, k: 100 }, items: ["1 ölçek protein tozu"] },
-      { id: "aksam", name: "Akşam", time: ["20:00", "21:00"], tip: "Günün en büyük öğünü. Yatmadan en az 2–3 saat önce bitmiş olsun.", m: { p: 55.2, c: 75.56, f: 56.5, k: 1101 },
-        items: ["150 gr yağsız kıyma", "50 gr nohut", "300 gr haşlanmış patates", "1 porsiyon yeşillik ve sebze", "2 yemek kaşığı zeytinyağı"] }
+      { id: "aksam", name: "Akşam", time: ["20:00", "21:00"], tip: "Günün en büyük öğünü. Yatmadan en az 2–3 saat önce bitmiş olsun.", m: { p: 63.0, c: 84.36, f: 50.4, k: 1116 },
+        items: ["150 gr yağsız kıyma", "50 gr nohut", "300 gr haşlanmış patates", "1 porsiyon yeşillik ve sebze", "1 yemek kaşığı zeytinyağı", "200 gr Hollandia Selský yoğurt"] }
     ],
     // [isim, set, tekrar, not, kg alanı yok, kardiyo]
     days: [
