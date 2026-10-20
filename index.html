@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cutline</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cutline">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%}</style>
+</head>
+<body>
+<style>
+/* Layout: one iOS-style column — translucent sticky chrome, large title, week of activity rings, grouped lists, floating rest timer. */
+:root {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --fill: #e9e9ef;
+  --fg: #1c1c1e;
+  --fg2: #6c6c74;
+  --sep: rgba(60, 60, 67, 0.16);
+  --chrome: rgba(242, 242, 247, 0.72);
+  --glass: rgba(255, 255, 255, 0.78);
+  --thumb: #ffffff;
+  --diet: #22a861;
+  --train: #f2601f;
+  --habit: #1f7ff0;
+  --track-diet: rgba(34, 168, 97, 0.16);
+  --track-train: rgba(242, 96, 31, 0.16);
+  --track-habit: rgba(31, 127, 240, 0.16);
+  --danger: #e5383b;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #1c1c1e; --fill: #2c2c2e; --fg: #f5f5f7; --fg2: #9a9aa2;
+    --sep: rgba(120, 120, 128, 0.32); --chrome: rgba(0, 0, 0, 0.66); --glass: rgba(44, 44, 46, 0.78); --thumb: #5b5b61;
+    --diet: #45d483; --train: #ff7a3d; --habit: #4ea2ff;
+    --track-diet: rgba(69, 212, 131, 0.2); --track-train: rgba(255, 122, 61, 0.2); --track-habit: rgba(78, 162, 255, 0.2);
+    --danger: #ff5a5f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --surface: #1c1c1e; --fill: #2c2c2e; --fg: #f5f5f7; --fg2: #9a9aa2;
+  --sep: rgba(120, 120, 128, 0.32); --chrome: rgba(0, 0, 0, 0.66); --glass: rgba(44, 44, 46, 0.78); --thumb: #5b5b61;
+  --diet: #45d483; --train: #ff7a3d; --habit: #4ea2ff;
+  --track-diet: rgba(69, 212, 131, 0.2); --track-train: rgba(255, 122, 61, 0.2); --track-habit: rgba(78, 162, 255, 0.2);
+  --danger: #ff5a5f; color-scheme: dark;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.45 var(--font); font-variant-numeric: tabular-nums; -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--chrome); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--habit); outline-offset: 2px; border-radius: 8px; }
+
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Translucent chrome */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--chrome); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
+.top .wrap { padding-block: 10px; }
+.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px; pointer-events: none; background: linear-gradient(var(--chrome), transparent); opacity: 0.6; }
+
+.seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; background: var(--fill); border-radius: 10px; padding: 2px; }
+.seg button { position: relative; z-index: 1; height: 32px; font-size: 0.875rem; font-weight: 600; letter-spacing: -0.005em; border-radius: 8px; color: var(--fg2); transition: color 0.2s ease; }
+.seg button[aria-selected="true"] { color: var(--fg); }
+.seg .thumb { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); background: var(--thumb); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 1px rgba(0,0,0,.04); transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.25, 1); }
+.seg[data-tab="ilerleme"] .thumb { transform: translateX(100%); }
+
+main.wrap { padding-block: 8px calc(110px + env(safe-area-inset-bottom, 0px)); }
+
+.dayhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 14px 0 12px; }
+.eyebrow { margin: 0 0 2px; font-size: 0.8125rem; font-weight: 600; color: var(--fg2); letter-spacing: 0.01em; }
+h1 { margin: 0; font-family: var(--font-display); font-size: 2.125rem; line-height: 1.08; font-weight: 700; letter-spacing: -0.022em; text-wrap: balance; }
+.daynav { display: flex; gap: 8px; }
+.round { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; color: var(--fg); transition: transform 0.1s ease-out, opacity 0.2s; }
+.round:active { transform: scale(0.92); }
+.round:disabled { opacity: 0.3; cursor: default; }
+.round svg { width: 16px; height: 16px; }
+
+/* Week strip */
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 0 -4px 14px; }
+.wd { display: grid; justify-items: center; gap: 4px; padding: 6px 0 8px; border-radius: 14px; transition: background-color 0.2s ease, transform 0.1s ease-out; }
+.wd:active { transform: scale(0.94); }
+.wd[aria-current="date"] { background: var(--surface); }
+.wd:disabled { opacity: 0.35; cursor: default; }
+.wd .n { font-size: 0.6875rem; font-weight: 600; color: var(--fg2); letter-spacing: 0.02em; }
+.wd .d { font-size: 0.8125rem; font-weight: 600; }
+.wd.today .d { color: var(--train); }
+.wd svg { width: 34px; height: 34px; transform: rotate(-90deg); }
+.wd svg circle { fill: none; stroke-width: 4.2; stroke-linecap: round; }
+.wd .c { font-size: 0.625rem; font-weight: 600; color: var(--fg2); line-height: 1; margin-top: -1px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wd .c.rest { color: var(--habit); }
+
+.card { background: var(--surface); border-radius: 18px; }
+.summary { display: grid; grid-template-columns: 132px 1fr; gap: 18px; align-items: center; padding: 18px; }
+.rings { width: 132px; height: 132px; transform: rotate(-90deg); }
+.rings circle { fill: none; stroke-width: 13; stroke-linecap: round; }
+.rings .p { transition: stroke-dashoffset 0.7s cubic-bezier(0.2, 0.9, 0.25, 1); }
+.legend { display: grid; gap: 10px; min-width: 0; }
+.leg-label { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.01em; }
+.leg-val { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.015em; }
+.leg-val small { font-size: 0.9375rem; font-weight: 500; color: var(--fg2); letter-spacing: 0; }
+.c-diet { color: var(--diet); } .c-train { color: var(--train); } .c-habit { color: var(--habit); }
+
+.macros { padding: 14px 18px 16px; margin-top: 10px; display: grid; gap: 10px; }
+.kcal { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.kcal b { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: -0.01em; }
+.kcal span { color: var(--fg2); font-size: 0.875rem; }
+.bar { height: 8px; border-radius: 4px; background: var(--track-diet); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--diet); border-radius: 4px; transition: width 0.6s cubic-bezier(0.2, 0.9, 0.25, 1); }
+.mrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mrow div { font-size: 0.8125rem; color: var(--fg2); }
+.mrow b { display: block; color: var(--fg); font-size: 0.9375rem; font-weight: 600; }
+
+.sect { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 28px 4px 8px; font-family: var(--font-display); font-size: 1.375rem; font-weight: 700; letter-spacing: -0.018em; }
+.sect span { font-family: var(--font); font-size: 0.875rem; font-weight: 500; letter-spacing: 0; color: var(--fg2); }
+.sub { margin: 18px 4px 6px; font-size: 0.8125rem; font-weight: 600; color: var(--fg2); text-transform: uppercase; letter-spacing: 0.04em; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sub .tm { font-variant-numeric: tabular-nums; }
+.tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.6875rem; letter-spacing: 0.02em; vertical-align: 1px; background: var(--track-diet); color: var(--diet); }
+.tag.next { background: var(--fill); color: var(--fg2); }
+.mealtip { margin: -2px 4px 6px; font-size: 0.8125rem; color: var(--fg2); }
+.sub button { color: var(--diet); font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 0.875rem; padding: 4px 0; }
+
+.group { background: var(--surface); border-radius: 14px; overflow: hidden; }
+.row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 50px; padding: 10px 14px; text-align: left; }
+.row + .row::before { content: ""; position: absolute; top: 0; right: 0; left: 50px; height: 1px; background: var(--sep); transform: scaleY(0.6); }
+.row .hit { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; text-align: left; align-self: stretch; margin: -10px 0 -10px -14px; padding: 10px 0 10px 14px; transition: background-color 0.15s ease; }
+.row .hit:active { background: var(--fill); }
+.txt { flex: 1; min-width: 0; }
+.txt .t { font-size: 1rem; line-height: 1.3; transition: color 0.2s ease; }
+.txt .s { font-size: 0.8125rem; color: var(--fg2); margin-top: 1px; }
+.txt .s em { font-style: normal; color: var(--train); }
+[aria-checked="true"] .txt .t { color: var(--fg2); }
+
+.chk { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--sep); display: grid; place-items: center; transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.chk svg { width: 13px; height: 13px; stroke: #fff; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset 0.25s ease 0.05s; }
+[aria-checked="true"] .chk { transform: scale(1.06); border-color: transparent; }
+[aria-checked="true"] .chk svg { stroke-dashoffset: 0; }
+.diet [aria-checked="true"] .chk { background: var(--diet); }
+.train [aria-checked="true"] .chk { background: var(--train); }
+.habit [aria-checked="true"] .chk { background: var(--habit); }
+
+/* Exercise rows with set dots */
+.ex { flex-wrap: wrap; row-gap: 0; }
+.ex .hit { margin-bottom: 0; padding-bottom: 2px; }
+.sets { display: flex; gap: 6px; flex-basis: 100%; padding: 8px 0 2px 36px; }
+.dot { width: 36px; height: 30px; border-radius: 8px; background: var(--fill); font-size: 0.75rem; font-weight: 700; color: var(--fg2); display: grid; place-items: center; transition: background-color 0.18s ease, color 0.18s ease, transform 0.1s ease-out; }
+.dot:active { transform: scale(0.92); }
+.dot[aria-pressed="true"] { background: var(--train); color: #fff; }
+.dot.opt { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fill); }
+.dot.opt[aria-pressed="true"] { background: var(--train); box-shadow: none; }
+
+.kg { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.kg label { display: flex; align-items: center; gap: 4px; background: var(--fill); border-radius: 8px; padding: 0 8px; height: 32px; }
+.kg input { width: 44px; border: 0; background: transparent; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; outline: none; padding: 0; }
+.kg input::placeholder { color: var(--fg2); font-weight: 400; }
+.kg label span { font-size: 0.8125rem; color: var(--fg2); }
+.kg small { font-size: 0.6875rem; color: var(--fg2); }
+
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 4px 10px; margin: 0 -4px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; padding: 7px 12px; border-radius: 999px; background: var(--surface); font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--fg); transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease-out; }
+.chip:active { transform: scale(0.96); }
+.chip[aria-pressed="true"] { background: var(--train); color: #fff; }
+.chip small { font-weight: 500; opacity: 0.75; }
+.note { padding: 12px 14px; color: var(--fg2); font-size: 0.875rem; }
+.restcard { padding: 16px; display: grid; gap: 6px; }
+.restcard b { font-family: var(--font-display); font-size: 1.125rem; letter-spacing: -0.01em; }
+.restcard p { margin: 0; color: var(--fg2); font-size: 0.9375rem; }
+.linkbtn { display: block; margin: 10px 4px 0; color: var(--fg2); font-size: 0.875rem; font-weight: 500; }
+.linkbtn b { color: var(--train); font-weight: 600; }
+.txt .s .up { color: var(--diet); }
+
+.foot { margin: 28px 4px 0; font-size: 0.75rem; color: var(--fg2); text-align: center; }
+.toast { position: fixed; left: 50%; top: calc(64px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -20px); opacity: 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 0.875rem; font-weight: 600; transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.25s ease; z-index: 20; max-width: calc(100% - 32px); pointer-events: none; }
+.toast.on { transform: translate(-50%, 0); opacity: 1; }
+
+/* Rest timer — floating glass material */
+.timer { position: fixed; z-index: 15; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(420px, calc(100% - 2 * max(16px, env(safe-area-inset-left, 0px)))); display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; border-radius: 22px; background: var(--glass); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); box-shadow: 0 10px 30px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.25) inset; transform: translate(-50%, calc(100% + 40px)) scale(0.96); filter: blur(6px); opacity: 0; transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.3s ease, filter 0.35s ease; }
+.timer.on { transform: translate(-50%, 0) scale(1); filter: blur(0); opacity: 1; }
+.timer svg { flex: none; width: 44px; height: 44px; transform: rotate(-90deg); }
+.timer svg circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.timer .tt { flex: 1; min-width: 0; }
+.timer .tv { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.timer .tl { font-size: 0.8125rem; color: var(--fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.timer.done .tv { color: var(--diet); }
+.pill { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; background: var(--fill); font-weight: 600; font-size: 0.9375rem; transition: transform 0.1s ease-out; }
+.pill:active { transform: scale(0.95); }
+.pill.primary { background: var(--train); color: #fff; }
+
+/* Progress */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { padding: 14px 16px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.stat .k { font-size: 0.8125rem; font-weight: 600; color: var(--fg2); }
+.stat .v { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.stat .v small { font-size: 1rem; font-weight: 500; color: var(--fg2); letter-spacing: 0; }
+.stat .d { font-size: 0.8125rem; color: var(--fg2); }
+.stat .d b { color: var(--diet); font-weight: 600; }
+.weekcard { margin-top: 10px; padding: 14px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.weekcard .k { font-size: 0.8125rem; font-weight: 600; }
+.weekcard .v { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.weekcard .v small { font-size: 0.9375rem; color: var(--fg2); font-weight: 500; }
+.weekhead { grid-column: 1 / -1; font-size: 0.8125rem; font-weight: 600; color: var(--fg2); }
+.chart { padding: 14px 12px 10px; margin-top: 10px; }
+.chart h3 { margin: 0 4px 6px; font-size: 0.9375rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.chart h3 span { font-weight: 500; color: var(--fg2); font-size: 0.8125rem; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart svg text { fill: var(--fg2); font: 10px var(--font); }
+.empty { padding: 22px 16px; text-align: center; color: var(--fg2); font-size: 0.9375rem; }
+
+form.group { padding: 4px 0; }
+.field { display: flex; align-items: center; gap: 12px; padding: 0 14px; min-height: 46px; position: relative; }
+.field + .field::before { content: ""; position: absolute; top: 0; right: 0; left: 14px; height: 1px; background: var(--sep); transform: scaleY(0.6); }
+.field label { flex: 1; font-size: 1rem; }
+.field input { width: 9.5rem; max-width: 50%; border: 0; background: transparent; text-align: right; color: var(--fg); outline: none; font-variant-numeric: tabular-nums; }
+.field input::placeholder { color: var(--fg2); }
+details.more summary { list-style: none; cursor: pointer; padding: 12px 14px; color: var(--habit); font-weight: 600; font-size: 0.9375rem; position: relative; }
+details.more summary::before { content: ""; position: absolute; top: 0; right: 0; left: 14px; height: 1px; background: var(--sep); transform: scaleY(0.6); }
+details.more summary::-webkit-details-marker { display: none; }
+.btn { display: block; width: 100%; height: 50px; margin-top: 12px; border-radius: 14px; background: var(--train); color: #fff; font-weight: 600; font-size: 1.0625rem; transition: transform 0.1s ease-out, opacity 0.2s; }
+.btn:active { transform: scale(0.98); }
+.btn.ghost { background: var(--surface); color: var(--fg); }
+.entry + .entry::before { left: 14px; }
+.entry .del { flex: none; font-size: 0.875rem; font-weight: 600; color: var(--danger); padding: 6px 2px; }
+.backup { padding: 14px; display: grid; gap: 10px; }
+.backup p { margin: 0; font-size: 0.875rem; color: var(--fg2); }
+.backup textarea { width: 100%; min-height: 90px; border: 0; border-radius: 10px; background: var(--fill); padding: 10px; font: 12px/1.4 ui-monospace, "SF Mono", Menlo, monospace; resize: vertical; }
+.backup .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.backup .btns .btn { margin: 0; height: 44px; font-size: 0.9375rem; }
+
+@media (max-width: 380px) {
+  .summary { grid-template-columns: 112px 1fr; gap: 14px; padding: 16px; }
+  .rings { width: 112px; height: 112px; }
+  h1 { font-size: 1.875rem; }
+  .wd svg { width: 30px; height: 30px; }
+  .dot { width: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  [aria-checked="true"] .chk { transform: none; }
+  .timer { filter: none; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .top, body::before { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .timer { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .group, .card, .chip, .round, .timer { box-shadow: 0 0 0 1px var(--fg2); }
+}
+</style>
+
+<div class="top"><div class="wrap">
+  <div class="seg" id="seg" data-tab="bugun" role="tablist" aria-label="Görünüm">
+    <span class="thumb" aria-hidden="true"></span>
+    <button role="tab" id="tab-bugun" aria-selected="true" aria-controls="view-bugun">Bugün</button>
+    <button role="tab" id="tab-ilerleme" aria-selected="false" aria-controls="view-ilerleme">İlerleme</button>
+  </div>
+</div></div>
+
+<main class="wrap">
+  <section id="view-bugun" role="tabpanel" aria-labelledby="tab-bugun">
+    <header class="dayhead">
+      <div>
+        <p class="eyebrow" id="weekday">&nbsp;</p>
+        <h1 id="daytitle">Bugün</h1>
+      </div>
+      <div class="daynav">
+        <button class="round" id="prev" aria-label="Önceki hafta"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg></button>
+        <button class="round" id="next" aria-label="Sonraki hafta"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg></button>
+      </div>
+    </header>
+    <nav class="week" id="week" aria-label="Hafta"></nav>
+
+    <div class="card summary">
+      <svg class="rings" viewBox="0 0 132 132" aria-hidden="true">
+        <circle cx="66" cy="66" r="58" style="stroke: var(--track-diet)"/>
+        <circle class="p" id="ring-diet" cx="66" cy="66" r="58" style="stroke: var(--diet)"/>
+        <circle cx="66" cy="66" r="43" style="stroke: var(--track-train)"/>
+        <circle class="p" id="ring-train" cx="66" cy="66" r="43" style="stroke: var(--train)"/>
+        <circle cx="66" cy="66" r="28" style="stroke: var(--track-habit)"/>
+        <circle class="p" id="ring-habit" cx="66" cy="66" r="28" style="stroke: var(--habit)"/>
+      </svg>
+      <div class="legend">
+        <div><div class="leg-label c-diet">Diyet</div><div class="leg-val" id="lv-diet">0<small>/11</small></div></div>
+        <div><div class="leg-label c-train">Antrenman</div><div class="leg-val" id="lv-train">0<small>/8</small></div></div>
+        <div><div class="leg-label c-habit">Alışkanlık</div><div class="leg-val" id="lv-habit">0<small>/2</small></div></div>
+      </div>
+    </div>
+
+    <div class="card macros">
+      <div class="kcal"><b id="kcal">0 kcal</b><span id="kcal-goal">hedef 2.045 kcal</span></div>
+      <div class="bar"><i id="kcal-bar"></i></div>
+      <div class="mrow">
+        <div>Protein<b id="m-p">0 / 143 g</b></div>
+        <div>Karbonhidrat<b id="m-c">0 / 159 g</b></div>
+        <div>Yağ<b id="m-f">0 / 86 g</b></div>
+      </div>
+    </div>
+
+    <h2 class="sect">Diyet <span id="streak"></span></h2>
+    <div id="diet" class="diet"></div>
+
+    <h2 class="sect">Antrenman <span id="wlabel"></span></h2>
+    <div id="wdays" class="chips" role="group" aria-label="Antrenman programı" hidden></div>
+    <div id="workout" class="train"></div>
+    <button class="linkbtn" id="chg" type="button" aria-controls="wdays" aria-expanded="false">Bugün başka bir program mı yapacaksın? <b>Değiştir</b></button>
+
+    <h2 class="sect">Alışkanlıklar</h2>
+    <div id="habits" class="group habit"></div>
+  </section>
+
+  <section id="view-ilerleme" role="tabpanel" aria-labelledby="tab-ilerleme" hidden>
+    <header class="dayhead"><div><p class="eyebrow">Boy 188 cm · Bel hedefi 94 cm</p><h1>İlerleme</h1></div></header>
+    <div class="stats" id="stats"></div>
+    <div class="card weekcard" id="weekcard"></div>
+    <div class="card chart" id="chart-w"></div>
+    <div class="card chart" id="chart-b"></div>
+
+    <h2 class="sect">Ölçüm ekle</h2>
+    <form class="group" id="form" novalidate>
+      <div class="field"><label for="f-date">Tarih</label><input id="f-date" type="date"></div>
+      <div class="field"><label for="f-weight">Kilo</label><input id="f-weight" inputmode="decimal" placeholder="kg"></div>
+      <div class="field"><label for="f-waist">Bel</label><input id="f-waist" inputmode="decimal" placeholder="cm"></div>
+      <details class="more">
+        <summary>Diğer ölçüler</summary>
+        <div class="field"><label for="f-chest">Göğüs</label><input id="f-chest" inputmode="decimal" placeholder="cm"></div>
+        <div class="field"><label for="f-shoulder">Omuz</label><input id="f-shoulder" inputmode="decimal" placeholder="cm"></div>
+        <div class="field"><label for="f-hip">Kalça</label><input id="f-hip" inputmode="decimal" placeholder="cm"></div>
+        <div class="field"><label for="f-thigh">Bacak</label><input id="f-thigh" inputmode="decimal" placeholder="cm"></div>
+      </details>
+    </form>
+    <button class="btn" id="save" type="button">Kaydet</button>
+
+    <h2 class="sect">Geçmiş</h2>
+    <div class="group" id="entries"></div>
+
+    <div id="backup-wrap" hidden>
+      <h2 class="sect">Yedek</h2>
+      <div class="group backup">
+        <p>Kayıtların bu telefonda tutuluyor. Arada bir yedeği kopyalayıp Notlar'a yapıştır; telefon değişirse buradan geri yüklersin.</p>
+        <textarea id="backup-text" aria-label="Yedek metni" placeholder="Geri yüklemek için yedeği buraya yapıştır"></textarea>
+        <div class="btns">
+          <button class="btn ghost" id="backup-copy" type="button">Yedeği kopyala</button>
+          <button class="btn ghost" id="backup-load" type="button">Geri yükle</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</main>
+
+<div class="timer" id="timer" role="timer" aria-live="polite" aria-hidden="true">
+  <svg viewBox="0 0 44 44" aria-hidden="true">
+    <circle cx="22" cy="22" r="18" style="stroke: var(--track-train)"/>
+    <circle id="t-ring" cx="22" cy="22" r="18" style="stroke: var(--train)"/>
+  </svg>
+  <div class="tt"><div class="tv" id="t-time">0:45</div><div class="tl" id="t-label">Dinlenme</div></div>
+  <button class="pill" id="t-add" type="button" tabindex="-1">+15 sn</button>
+  <button class="pill primary" id="t-close" type="button" tabindex="-1">Bitti</button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  const PLAN = {
+    target: { k: 2045, p: 143, c: 159, f: 86 },
+    meals: [
+      { id: "ogle", name: "Öğle", time: ["12:00", "13:00"], m: { p: 63.38, c: 79.995, f: 27.41, k: 843.5 },
+        items: ["250 gr tavuk göğüs", "100 gr basmati pirinç", "1 porsiyon yeşillik ve sebze", "1,5 yemek kaşığı zeytinyağı"] },
+      { id: "ara1", name: "Yeşil çay", time: ["15:00", "16:00"], tip: "Yemekten en az 1 saat uzak iç, demirin emilimini engellemesin.", m: { p: 0, c: 0, f: 0, k: 0 }, items: ["1 bardak yeşil çay"] },
+      { id: "ara2", name: "Protein", time: ["17:30", "18:30"], tip: "Antrenman günü antrenmandan hemen sonra iç; saat kayabilir.", m: { p: 24, c: 3, f: 2, k: 100 }, items: ["1 ölçek protein tozu"] },
+      { id: "aksam", name: "Akşam", time: ["20:00", "21:00"], tip: "Günün en büyük öğünü. Yatmadan en az 2–3 saat önce bitmiş olsun.", m: { p: 55.2, c: 75.56, f: 56.5, k: 1101 },
+        items: ["150 gr yağsız kıyma", "50 gr nohut", "300 gr haşlanmış patates", "1 porsiyon yeşillik ve sebze", "2 yemek kaşığı zeytinyağı"] }
+    ],
+    // [isim, set, tekrar, not, kg alanı yok, kardiyo]
+    days: [
+      { n: 1, id: "gogus", short: "Göğüs", name: "Göğüs · Arka kol", ex: [
+        ["Smith machine incline bench press", "3 set", "12 tekrar"],
+        ["Cable crossover", "3–4 set", "15 tekrar"],
+        ["Bench press", "3 set", "12 tekrar", "Bileşik set: dumbbell fly ile"],
+        ["Dumbbell fly", "3 set", "max tekrar"],
+        ["Lying Z bar triceps extension", "3–4 set", "12 tekrar"],
+        ["Rope push down", "3 set", "max tekrar", "Bileşik set: bench dips ile"],
+        ["Bench dips", "3 set", "max tekrar", null, true],
+        ["Kardiyo", "25 dk", "", null, true, true]
+      ]},
+      { n: 2, id: "sirt", short: "Sırt", name: "Sırt · Ön kol", ex: [
+        ["Lat pull down", "3–4 set", "12 tekrar"],
+        ["Reverse lat pulldown", "3–4 set", "12 tekrar"],
+        ["Smith machine barbell row", "3 set", "12 tekrar"],
+        ["Straight arm lat pull", "3–4 set", "12 tekrar"],
+        ["Dumbbell shrug", "3–4 set", "max tekrar"],
+        ["Spider barbell curl", "3 set", "15 tekrar", "Bileşik set: hammer curl ile"],
+        ["Hammer curl", "3 set", "max tekrar"],
+        ["Scott curl", "3–4 set", "12 tekrar"],
+        ["Kardiyo", "25 dk", "", null, true, true]
+      ]},
+      { n: 3, id: "bacak", short: "Bacak", name: "Bacak · Omuz", ex: [
+        ["Dumbbell squat", "3 set", "12 tekrar"],
+        ["Leg extension", "3–4 set", "12-11-10-max"],
+        ["Leg curl", "3–4 set", "12-11-10-max"],
+        ["Hip thrust", "3 set", "max tekrar"],
+        ["Standing calf raises", "3–4 set", "max tekrar"],
+        ["Military press", "3–4 set", "12 tekrar"],
+        ["Dumbbell lateral raises", "3 set", "12-11-10"],
+        ["Dumbbell front raises", "2–3 set", "11-10-9"],
+        ["Facepull", "2–3 set", "max tekrar"],
+        ["Kardiyo", "25 dk", "", null, true, true]
+      ]},
+      { n: 5, id: "kardiyo", short: "Kardiyo", name: "Kardiyo · Karın", ex: [
+        ["Crunch", "3 set", "12 tekrar", null, true],
+        ["Leg raises", "3 set", "8 tekrar", null, true],
+        ["Mountain climber", "3 set", "max tekrar", null, true],
+        ["Kardiyo", "45–50 dk", "", null, true, true]
+      ]},
+      { n: 4, id: "ust", short: "Üst", name: "Üst vücut", ex: [
+        ["Close grip lat pull down", "3–4 set", "12 tekrar"],
+        ["Dumbbell row", "3 set", "12 tekrar"],
+        ["Bench press", "3–4 set", "12 tekrar"],
+        ["Dumbbell lateral raises", "3–4 set", "12 tekrar"],
+        ["Triceps push down", "3–4 set", "12 tekrar"],
+        ["Bench dips", "3 set", "max tekrar", null, true],
+        ["Cable hammer curl", "3–4 set", "12 tekrar"],
+        ["Concentration curl", "3 set", "12 tekrar"],
+        ["Kardiyo", "20 dk", "", null, true, true]
+      ]}
+    ],
+    // JS getDay(): 0 Pazar … 6 Cumartesi
+    schedule: { 2: "gogus", 3: "sirt", 4: "bacak", 5: "rest", 6: "ust", 0: "kardiyo", 1: "rest" },
+    habits: [
+      ["adim", "8–10 bin adım", "Günlük yürüyüş"],
+      ["uyku", "7–8 saat uyku", "Yağ kaybını ve iştahı doğrudan etkiler"]
+    ],
+    rest: 45, height: 188, waistGoal: 94
+  };
+  const DIET_TOTAL = PLAN.meals.reduce((a, m) => a + m.items.length, 0);
+  const CHECK = '<svg viewBox="0 0 14 14"><path d="M3 7.4 5.8 10 11 4"/></svg>';
+  const WD_SHORT = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+
+  function exInfo(e) {
+    const [name, sets, reps, note, noKg, cardio] = e;
+    let mn = 1, mx = 1;
+    if (!cardio) { const m = sets.match(/(\d+)(?:\s*[–-]\s*(\d+))?/); mn = +m[1]; mx = m[2] ? +m[2] : mn; }
+    return { name, sets, reps, note, noKg, cardio, mn, mx };
+  }
+  PLAN.days.sort((a, b) => a.n - b.n);
+  const LEGACY = { 0: "rest", 1: "gogus", 2: "sirt", 3: "bacak", 4: "kardiyo", 5: "ust" };
+  const progId = v => typeof v === "number" ? LEGACY[v] : v;
+  const planFor = id => PLAN.days.find(x => x.id === id);
+
+  // ---------- dates ----------
+  const pad = n => String(n).padStart(2, "0");
+  const ds = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const parseDs = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const addDays = (s, n) => { const d = parseDs(s); d.setDate(d.getDate() + n); return ds(d); };
+  const today = () => ds(new Date());
+  const weekStart = s => { const d = parseDs(s); const wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd); return ds(d); };
+  const fmtShort = s => parseDs(s).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+  const fmtLong = s => parseDs(s).toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+  const fmtNum = (n, d = 1) => (Math.round(n * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString("tr-TR");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const clone = o => JSON.parse(JSON.stringify(o));
+
+  // ---------- state & storage ----------
+  const state = { date: today(), tab: "bugun", days: {}, progress: { entries: [] }, readOnly: false, progressLoaded: false };
+  const LS = {
+    get(k) { try { return JSON.parse(localStorage.getItem("cutline:" + k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem("cutline:" + k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  };
+  state.days = LS.get("days") || {};
+  const lp = LS.get("progress");
+  if (lp) { state.progress = lp; state.progressLoaded = true; }
+
+  let db = null;
+  const writers = {};
+  const isDirty = key => !!(writers[key] && (writers[key].timer || writers[key].inflight));
+
+  function queueWrite(key, getData, delay) {
+    if (state.readOnly) return;
+    const w = writers[key] || (writers[key] = { timer: null, inflight: 0, chain: Promise.resolve() });
+    clearTimeout(w.timer);
+    w.timer = setTimeout(() => {
+      w.timer = null;
+      const data = clone(getData());
+      if (!db) {
+        if (key.startsWith("days/")) { const m = LS.get("days") || {}; m[key.slice(5)] = data; LS.set("days", m); }
+        else LS.set("progress", data);
+        return;
+      }
+      w.inflight++;
+      w.chain = w.chain.then(() => db.doc(key).set(data)).catch(err => {
+        if (err && err.code === "invalid_argument") { state.readOnly = true; toast("Bu sayfada değişiklik kaydedemiyorsun"); }
+        else if (err && err.code === "quota_exceeded") toast("Kayıt alanı doldu, eski kayıtları sil");
+        else toast("Kaydedilemedi, bağlantını kontrol et");
+      }).finally(() => { w.inflight--; });
+    }, delay == null ? 300 : delay);
+  }
+
+  function getDay(date) { return state.days[date] || {}; }
+  function ensureDay(date) {
+    const d = state.days[date] || (state.days[date] = {});
+    d.diet = d.diet || {}; d.habits = d.habits || {};
+    d.workout = d.workout || {}; d.workout.sets = d.workout.sets || {}; d.workout.kg = d.workout.kg || {};
+    return d;
+  }
+  function touch(date, delay) {
+    const d = ensureDay(date); d.updatedAt = Date.now();
+    queueWrite("days/" + date, () => state.days[date], delay);
+  }
+
+  // ---------- derived ----------
+  function setsDone(w, info) {
+    if (!w) return 0;
+    if (w.sets && w.sets[info.name] != null) return w.sets[info.name];
+    if (w.done && w.done[info.name]) return info.mx;
+    return 0;
+  }
+  const exDone = (w, info) => setsDone(w, info) >= info.mn;
+  function dietCount(day) { const d = day.diet || {}; return Object.keys(d).filter(k => d[k]).length; }
+  const dietComplete = day => dietCount(day) >= DIET_TOTAL;
+  const scheduled = date => PLAN.schedule[parseDs(date).getDay()];
+  function wday(date) { const w = getDay(date).workout; return w && w.day != null ? progId(w.day) : scheduled(date); }
+  function trained(day) {
+    const w = day.workout; if (!w) return false;
+    return PLAN.days.some(p => p.ex.some(e => w.sets && w.sets[e[0]] > 0)) || !!(w.done && Object.values(w.done).some(Boolean));
+  }
+  function nextWorkout(date) {
+    for (let i = 1; i <= 7; i++) { const d = addDays(date, i), p = planFor(scheduled(d)); if (p) return { d, p, i }; }
+    return null;
+  }
+  function lastSession(name, date) {
+    const prev = Object.keys(state.days).filter(k => k < date).sort().reverse();
+    for (const k of prev) { const w = state.days[k].workout; if (w && w.kg && w.kg[name]) return { kg: w.kg[name], sets: w.sets && w.sets[name] != null ? w.sets[name] : (w.done && w.done[name] ? 99 : 0) }; }
+    return null;
+  }
+  const lastKg = (name, date) => { const l = lastSession(name, date); return l ? l.kg : null; };
+  const step = name => /dumbbell|dumbell/i.test(name) ? 2 : 2.5;
+  function fractions(date) {
+    const day = getDay(date), dc = dietCount(day);
+    const plan = planFor(wday(date));
+    let wt = 0, wdone = 0;
+    if (plan) { const ex = plan.ex.map(exInfo); wt = ex.length; wdone = ex.filter(i => exDone(day.workout, i)).length; }
+    const hd = PLAN.habits.filter(h => day.habits && day.habits[h[0]]).length;
+    return { dc, wt, wdone, hd, plan, diet: dc / DIET_TOTAL, train: plan ? wdone / wt : 0, habit: hd / PLAN.habits.length };
+  }
+  function streak() {
+    let n = 0, d = today();
+    if (!dietComplete(getDay(d))) d = addDays(d, -1);
+    while (dietComplete(getDay(d))) { n++; d = addDays(d, -1); }
+    return n;
+  }
+
+  // ---------- render: today ----------
+  const $ = id => document.getElementById(id);
+  function setRing(el, frac, r) {
+    const c = 2 * Math.PI * r;
+    el.style.strokeDasharray = c;
+    el.style.strokeDashoffset = c * (1 - Math.max(0, Math.min(1, frac)));
+  }
+  function miniRings(f) {
+    const ring = (r, frac, col, tr) => {
+      const c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(1, frac)));
+      return '<circle cx="17" cy="17" r="' + r + '" style="stroke: var(' + tr + ')"/>' + (frac > 0 ? '<circle cx="17" cy="17" r="' + r + '" style="stroke: var(' + col + ')" stroke-dasharray="' + c.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '"/>' : "");
+    };
+    return '<svg viewBox="0 0 34 34" aria-hidden="true">' + ring(14.5, f.diet, "--diet", "--track-diet") + ring(9.5, f.train, "--train", "--track-train") + ring(4.5, f.habit, "--habit", "--track-habit") + "</svg>";
+  }
+
+  function renderWeek() {
+    const start = weekStart(state.date), t = today();
+    let h = "";
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(start, i), fut = d > t;
+      const f = fut ? { diet: 0, train: 0, habit: 0 } : fractions(d);
+      h += '<button class="wd' + (d === t ? " today" : "") + '" type="button" data-date="' + d + '"' + (d === state.date ? ' aria-current="date"' : "") + (fut ? " disabled" : "") +
+        ' aria-label="' + fmtLong(d) + ', ' + (planFor(wday(d)) ? planFor(wday(d)).name : "dinlenme") + '"><span class="n">' + WD_SHORT[i] + '</span>' + miniRings(f) + '<span class="d">' + parseDs(d).getDate() + '</span>' +
+        (planFor(wday(d)) ? '<span class="c">' + esc(planFor(wday(d)).short) + '</span>' : '<span class="c rest">Mola</span>') + '</button>';
+    }
+    $("week").innerHTML = h;
+    $("next").disabled = addDays(start, 7) > t;
+  }
+
+  function updateSummary() {
+    const date = state.date, day = getDay(date), f = fractions(date);
+    setRing($("ring-diet"), f.diet, 58); setRing($("ring-train"), f.train, 43); setRing($("ring-habit"), f.habit, 28);
+    $("lv-diet").innerHTML = f.dc + "<small>/" + DIET_TOTAL + "</small>";
+    $("lv-train").innerHTML = f.plan ? f.wdone + "<small>/" + f.wt + "</small>" : "Dinlenme";
+    $("lv-habit").innerHTML = f.hd + "<small>/" + PLAN.habits.length + "</small>";
+
+    const sum = { k: 0, p: 0, c: 0, f: 0 };
+    PLAN.meals.forEach(m => {
+      const got = m.items.filter((_, i) => day.diet && day.diet[m.id + ":" + i]).length;
+      const fr = got / m.items.length;
+      ["k", "p", "c", "f"].forEach(x => sum[x] += m.m[x] * fr);
+    });
+    const T = PLAN.target;
+    $("kcal").textContent = Math.round(sum.k).toLocaleString("tr-TR") + " kcal";
+    $("kcal-goal").textContent = "hedef " + T.k.toLocaleString("tr-TR") + " kcal";
+    $("kcal-bar").style.width = Math.min(100, sum.k / T.k * 100) + "%";
+    $("m-p").textContent = Math.round(sum.p) + " / " + T.p + " g";
+    $("m-c").textContent = Math.round(sum.c) + " / " + T.c + " g";
+    $("m-f").textContent = Math.round(sum.f) + " / " + T.f + " g";
+    const s = streak();
+    $("streak").textContent = s > 0 ? s + " günlük seri" : "";
+    PLAN.meals.forEach(m => {
+      const b = document.querySelector('[data-meal="' + m.id + '"]');
+      if (b) { const all = m.items.every((_, i) => day.diet && day.diet[m.id + ":" + i]); b.textContent = all ? "Temizle" : "Tümü"; }
+    });
+    // keep this day's mini rings in the week strip in sync
+    const cell = document.querySelector('.wd[data-date="' + date + '"] svg');
+    if (cell) cell.outerHTML = miniRings(f);
+  }
+
+  function rowHtml(attrs, checked, title, sub, extra, cls) {
+    return '<div class="row' + (cls ? " " + cls : "") + '"><button class="hit" type="button" role="checkbox" aria-checked="' + (checked ? "true" : "false") + '" ' + attrs + '>' +
+      '<span class="chk">' + CHECK + '</span><span class="txt"><span class="t" style="display:block">' + esc(title) + '</span>' + (sub ? '<span class="s" style="display:block">' + sub + '</span>' : "") + '</span></button>' + (extra || "") + '</div>';
+  }
+
+  function exRow(info, idx, w, date) {
+    const n = setsDone(w, info), done = n >= info.mn;
+    let sub = info.cardio ? esc(info.sets) : esc(info.sets) + " · " + esc(info.reps);
+    if (info.note) sub += '<br><em>' + esc(info.note) + '</em>';
+    if (!info.noKg) {
+      const ls = lastSession(info.name, date), kgNow = w && w.kg && w.kg[info.name];
+      if (ls && ls.sets >= info.mx && !kgNow) sub += '<br><span class="up">Geçen sefer ' + String(ls.kg).replace(".", ",") + ' kg ile tüm setler bitti, ' + String(ls.kg + step(info.name)).replace(".", ",") + ' kg dene</span>';
+    }
+    let extra = "";
+    if (!info.noKg) {
+      const kg = w && w.kg || {}, last = lastKg(info.name, date);
+      const id = "kg-" + idx;
+      const fmt = v => esc(String(v).replace(".", ","));
+      extra += '<div class="kg"><label for="' + id + '"><input id="' + id + '" inputmode="decimal" data-kg="' + idx + '" value="' + (kg[info.name] != null ? fmt(kg[info.name]) : "") + '" placeholder="' + (last ? fmt(last) : "–") + '" aria-label="' + esc(info.name) + ' ağırlık"><span>kg</span></label>' +
+        (last ? '<small>son ' + fmt(last) + ' kg</small>' : "") + '</div>';
+    }
+    if (!info.cardio) {
+      extra += '<div class="sets" role="group" aria-label="' + esc(info.name) + ' setleri">';
+      for (let i = 0; i < info.mx; i++) extra += '<button class="dot' + (i >= info.mn ? " opt" : "") + '" type="button" data-exi="' + idx + '" data-set="' + (i + 1) + '" aria-pressed="' + (i < n) + '" aria-label="' + (i + 1) + '. set' + (i >= info.mn ? " (isteğe bağlı)" : "") + '">' + (i + 1) + '</button>';
+      extra += "</div>";
+    }
+    return rowHtml('data-exi="' + idx + '" data-exrow="1"', done, info.name, sub, extra, "ex");
+  }
+
+  function renderToday() {
+    const date = state.date, day = getDay(date), t = today();
+    const label = date === t ? "Bugün" : date === addDays(t, -1) ? "Dün" : fmtLong(date);
+    $("daytitle").textContent = label;
+    const wk = parseDs(date).toLocaleDateString("tr-TR", { weekday: "long" });
+    const pl = planFor(wday(date));
+    $("weekday").textContent = (date === t || date === addDays(t, -1) ? fmtLong(date) + ", " + wk : wk.charAt(0).toUpperCase() + wk.slice(1)) + " · " + (pl ? pl.name : "Dinlenme");
+    renderWeek();
+
+    const nowM = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
+    const mins = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+    let nextId = null;
+    if (date === t) { const up = PLAN.meals.find(m => mins(m.time[0]) > nowM); nextId = up ? up.id : null; }
+    $("diet").innerHTML = PLAN.meals.map(m => {
+      const kc = Math.round(m.m.k).toLocaleString("tr-TR") + " kcal";
+      const all = m.items.every((_, i) => day.diet && day.diet[m.id + ":" + i]);
+      const isNow = date === t && nowM >= mins(m.time[0]) && nowM <= mins(m.time[1]);
+      const tag = isNow ? '<span class="tag">Şimdi</span>' : (m.id === nextId && !all ? '<span class="tag next">Sıradaki</span>' : "");
+      const head = '<div class="sub"><span>' + esc(m.name) + ' · <span class="tm">' + m.time[0] + '–' + m.time[1] + '</span> · ' + kc + tag + '</span>' +
+        (m.items.length > 1 ? '<button type="button" data-meal="' + m.id + '">' + (all ? "Temizle" : "Tümü") + '</button>' : "") + '</div>';
+      return head + (m.tip ? '<p class="mealtip">' + esc(m.tip) + '</p>' : "") + '<div class="group">' + m.items.map((it, i) => rowHtml('data-diet="' + m.id + ":" + i + '"', day.diet && day.diet[m.id + ":" + i], it)).join("") + '</div>';
+    }).join("");
+
+    const wd = wday(date), sch = scheduled(date);
+    $("wdays").innerHTML = PLAN.days.map(d => '<button class="chip" type="button" data-wday="' + d.id + '" aria-pressed="' + (wd === d.id) + '">' + esc(d.name) + (d.id === sch ? ' <small>plan</small>' : "") + '</button>').join("") +
+      '<button class="chip" type="button" data-wday="rest" aria-pressed="' + (wd === "rest") + '">Dinlenme' + (sch === "rest" ? ' <small>plan</small>' : "") + '</button>';
+    const plan = planFor(wd);
+    $("wlabel").textContent = plan ? plan.name + " · set arası " + PLAN.rest + " sn" : "Dinlenme günü";
+    $("chg").innerHTML = wd !== sch ? 'Programdaki güne dön: <b>' + esc(planFor(sch) ? planFor(sch).name : "Dinlenme") + '</b>' : 'Bugün başka bir program mı yapacaksın? <b>Değiştir</b>';
+    $("chg").dataset.reset = wd !== sch ? "1" : "";
+    if (!plan) {
+      const nx = nextWorkout(date);
+      const when = nx ? (nx.i === 1 ? "Yarın" : parseDs(nx.d).toLocaleDateString("tr-TR", { weekday: "long" })) + ": " + nx.p.name : "";
+      $("workout").innerHTML = '<div class="group restcard"><b>Bugün dinlenme günü</b><p>Kaslar dinlenirken büyür. Hafif tempoda yürü, adım hedefini tamamla, 10 dakika esneme yeterli.</p>' + (when ? '<p>' + esc(when) + '</p>' : "") + '</div>';
+    } else {
+      const w = day.workout;
+      $("workout").innerHTML = '<div class="group">' + plan.ex.map((e, idx) => exRow(exInfo(e), idx, w, date)).join("") + '</div>';
+    }
+    $("habits").innerHTML = PLAN.habits.map(h => rowHtml('data-habit="' + h[0] + '"', day.habits && day.habits[h[0]], h[1], esc(h[2]))).join("");
+    updateSummary();
+    requestAnimationFrame(() => { const box = $("wdays"), c = box.querySelector('.chip[aria-pressed="true"]'); if (c && !box.hidden) box.scrollLeft = c.offsetLeft - (box.clientWidth - c.offsetWidth) / 2; });
+  }
+
+  // ---------- render: progress ----------
+  const num = v => { if (v == null || v === "") return null; const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n > 0 ? n : null; };
+  function series(key) { return (state.progress.entries || []).filter(e => e[key] != null).sort((a, b) => a.date < b.date ? -1 : 1).map(e => ({ d: e.date, v: e[key] })); }
+
+  function chartSvg(pts, color, unit, goal) {
+    if (!pts.length) return '<div class="empty">Henüz kayıt yok. Aşağıdan ilk ölçümünü ekle.</div>';
+    const W = 320, H = 150, L = 34, R = 14, T = 12, B = 24;
+    const vals = pts.map(p => p.v).concat(goal != null ? [goal] : []);
+    let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    const padv = Math.max(1, (hi - lo) * 0.15); lo = Math.floor(lo - padv); hi = Math.ceil(hi + padv);
+    const t0 = parseDs(pts[0].d).getTime(), t1 = parseDs(pts[pts.length - 1].d).getTime();
+    const x = d => pts.length === 1 || t1 === t0 ? (L + W - R) / 2 : L + (parseDs(d).getTime() - t0) / (t1 - t0) * (W - L - R);
+    const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+    const ticks = [lo, Math.round((lo + hi) / 2), hi];
+    let s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + unit + ' grafiği">';
+    ticks.forEach(tv => { s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(tv) + '" y2="' + y(tv) + '" stroke="var(--sep)" stroke-width="1"/><text x="' + (L - 6) + '" y="' + (y(tv) + 3.5) + '" text-anchor="end">' + tv + '</text>'; });
+    if (goal != null) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(goal) + '" y2="' + y(goal) + '" stroke="' + color + '" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.7"/><text x="' + (W - R) + '" y="' + (y(goal) - 5) + '" text-anchor="end">hedef ' + goal + '</text>';
+    if (pts.length > 1) {
+      const line = pts.map((p, i) => (i ? "L" : "M") + x(p.d).toFixed(1) + " " + y(p.v).toFixed(1)).join(" ");
+      s += '<path d="' + line + " L" + x(pts[pts.length - 1].d).toFixed(1) + " " + (H - B) + " L" + x(pts[0].d).toFixed(1) + " " + (H - B) + ' Z" fill="' + color + '" opacity="0.12"/>';
+      s += '<path d="' + line + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    pts.forEach((p, i) => { const last = i === pts.length - 1; s += '<circle cx="' + x(p.d) + '" cy="' + y(p.v) + '" r="' + (last ? 5 : 3) + '" fill="' + (last ? color : "var(--surface)") + '" stroke="' + color + '" stroke-width="2"/>'; });
+    s += '<text x="' + x(pts[0].d) + '" y="' + (H - 6) + '" text-anchor="' + (pts.length === 1 ? "middle" : "start") + '">' + fmtShort(pts[0].d) + '</text>';
+    if (pts.length > 1) s += '<text x="' + x(pts[pts.length - 1].d) + '" y="' + (H - 6) + '" text-anchor="end">' + fmtShort(pts[pts.length - 1].d) + '</text>';
+    return s + "</svg>";
+  }
+
+  function renderProgress() {
+    const w = series("weight"), b = series("waist");
+    const stat = (k, pts, unit, extra) => {
+      if (!pts.length) return '<div class="card stat"><div class="k">' + k + '</div><div class="v">–</div><div class="d">Kayıt yok</div></div>';
+      const cur = pts[pts.length - 1].v, diff = cur - pts[0].v;
+      const dtxt = pts.length > 1 ? (diff <= 0 ? '<b>' + fmtNum(diff) + " " + unit + "</b> başlangıçtan" : "+" + fmtNum(diff) + " " + unit + " başlangıçtan") : "Başlangıç ölçümü";
+      return '<div class="card stat"><div class="k">' + k + '</div><div class="v">' + fmtNum(cur) + '<small> ' + unit + '</small></div><div class="d">' + dtxt + (extra ? "<br>" + extra : "") + '</div></div>';
+    };
+    const lastWaist = b.length ? b[b.length - 1].v : null;
+    const ratio = lastWaist ? "Bel/boy " + fmtNum(lastWaist / PLAN.height, 2) + " · hedef 0,50" : "";
+    $("stats").innerHTML = stat("Kilo", w, "kg") + stat("Bel", b, "cm", ratio);
+
+    const ws = weekStart(today()), t = today();
+    let tr = 0, dt = 0, hb = 0, n = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(ws, i); if (d > t) break; n++;
+      const day = getDay(d); if (trained(day)) tr++; if (dietComplete(day)) dt++;
+      if (PLAN.habits.every(h => day.habits && day.habits[h[0]])) hb++;
+    }
+    $("weekcard").innerHTML = '<div class="weekhead">Bu hafta · ' + fmtShort(ws) + ' – ' + fmtShort(addDays(ws, 6)) + '</div>' +
+      '<div><div class="k c-train">Antrenman</div><div class="v">' + tr + '<small>/5</small></div></div>' +
+      '<div><div class="k c-diet">Tam diyet</div><div class="v">' + dt + '<small>/' + n + '</small></div></div>' +
+      '<div><div class="k c-habit">Alışkanlık</div><div class="v">' + hb + '<small>/' + n + '</small></div></div>';
+
+    $("chart-w").innerHTML = '<h3>Kilo <span>kg</span></h3>' + (state.progressLoaded ? chartSvg(w, "var(--train)", "Kilo") : '<div class="empty">Yükleniyor…</div>');
+    $("chart-b").innerHTML = '<h3>Bel <span>cm · kesikli çizgi 94 cm hedef</span></h3>' + (state.progressLoaded ? chartSvg(b, "var(--diet)", "Bel", PLAN.waistGoal) : '<div class="empty">Yükleniyor…</div>');
+
+    const list = (state.progress.entries || []).slice().sort((a, c) => a.date < c.date ? 1 : -1);
+    const fmtE = e => {
+      const parts = [];
+      if (e.chest) parts.push("göğüs " + fmtNum(e.chest)); if (e.shoulder) parts.push("omuz " + fmtNum(e.shoulder));
+      if (e.hip) parts.push("kalça " + fmtNum(e.hip)); if (e.thigh) parts.push("bacak " + fmtNum(e.thigh));
+      return parts.join(" · ");
+    };
+    $("entries").innerHTML = list.length ? list.map(e => {
+      const main = [e.weight ? fmtNum(e.weight) + " kg" : null, e.waist ? "bel " + fmtNum(e.waist) + " cm" : null].filter(Boolean).join(" · ") || "Ölçüler";
+      return '<div class="row entry"><span class="txt"><span class="t" style="display:block">' + fmtLong(e.date) + '</span><span class="s" style="display:block">' + esc(main) + (fmtE(e) ? "<br>" + esc(fmtE(e)) : "") + '</span></span><button class="del" type="button" data-del="' + e.date + '">Sil</button></div>';
+    }).join("") : '<div class="empty">Ölçümlerin burada listelenecek.</div>';
+    $("backup-wrap").hidden = !!db;
+  }
+
+  let pendingRender = false;
+  function render() {
+    const a = document.activeElement;
+    if (a && a.matches && a.matches("input, textarea")) { pendingRender = true; return; }
+    pendingRender = false;
+    renderToday(); renderProgress();
+    $("foot").textContent = state.readOnly ? "Bu sayfayı sadece görüntüleyebilirsin." : db ? "Kayıtların hesabına bağlı, her cihazdan aynı." : "Kayıtların bu cihazda tutuluyor.";
+  }
+  document.addEventListener("focusout", () => setTimeout(() => { if (pendingRender) render(); }, 0));
+
+  // ---------- rest timer ----------
+  const timer = { end: 0, total: PLAN.rest, raf: 0, hideT: 0, label: "" };
+  let audio = null;
+  function primeAudio() {
+    try { if (!audio) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audio = new AC(); } if (audio && audio.state === "suspended") audio.resume(); } catch (e) {}
+  }
+  function beep() {
+    try {
+      if (!audio) return;
+      [0, 0.22].forEach(t0 => {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = "sine"; o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+        const t = audio.currentTime + t0;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        o.start(t); o.stop(t + 0.18);
+      });
+    } catch (e) {}
+    try { navigator.vibrate && navigator.vibrate([180, 90, 180]); } catch (e) {}
+  }
+  function showTimer(on) {
+    const el = $("timer");
+    el.classList.toggle("on", on); el.setAttribute("aria-hidden", on ? "false" : "true");
+    $("t-add").tabIndex = on ? 0 : -1; $("t-close").tabIndex = on ? 0 : -1;
+  }
+  function tick() {
+    const left = Math.max(0, timer.end - Date.now());
+    const sec = Math.ceil(left / 1000);
+    $("t-time").textContent = Math.floor(sec / 60) + ":" + pad(sec % 60);
+    setRing($("t-ring"), left / (timer.total * 1000), 18);
+    if (left <= 0) {
+      $("timer").classList.add("done"); $("t-time").textContent = "Hazır";
+      $("t-label").textContent = "Sıradaki: " + timer.label; $("t-close").textContent = "Tamam";
+      beep(); clearTimeout(timer.hideT); timer.hideT = setTimeout(() => showTimer(false), 6000);
+      return;
+    }
+    timer.raf = requestAnimationFrame(tick);
+  }
+  function startTimer(label) {
+    cancelAnimationFrame(timer.raf); clearTimeout(timer.hideT);
+    timer.total = PLAN.rest; timer.end = Date.now() + PLAN.rest * 1000; timer.label = label;
+    $("timer").classList.remove("done"); $("t-label").textContent = "Dinlenme · " + label; $("t-close").textContent = "Bitti";
+    showTimer(true); tick();
+  }
+  $("t-add").addEventListener("click", () => {
+    if ($("timer").classList.contains("done")) { startTimer(timer.label); return; }
+    timer.end += 15000; timer.total += 15;
+  });
+  $("t-close").addEventListener("click", () => { cancelAnimationFrame(timer.raf); showTimer(false); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && $("timer").classList.contains("on") && !$("timer").classList.contains("done")) { cancelAnimationFrame(timer.raf); tick(); } });
+
+  // ---------- interactions ----------
+  function setTab(tab) {
+    state.tab = tab;
+    $("seg").dataset.tab = tab;
+    $("tab-bugun").setAttribute("aria-selected", tab === "bugun");
+    $("tab-ilerleme").setAttribute("aria-selected", tab === "ilerleme");
+    $("view-bugun").hidden = tab !== "bugun";
+    $("view-ilerleme").hidden = tab !== "ilerleme";
+    if (tab === "ilerleme") renderProgress();
+    window.scrollTo(0, 0);
+  }
+  $("tab-bugun").addEventListener("click", () => setTab("bugun"));
+  $("tab-ilerleme").addEventListener("click", () => setTab("ilerleme"));
+  $("prev").addEventListener("click", () => { state.date = addDays(weekStart(state.date), -1); renderToday(); });
+  $("next").addEventListener("click", () => {
+    const n = addDays(weekStart(state.date), 7), t = today();
+    if (n > t) return;
+    state.date = addDays(n, 6) >= t ? t : addDays(n, 6); renderToday();
+  });
+
+  function flip(btn, on) { btn.setAttribute("aria-checked", on ? "true" : "false"); }
+  function currentPlanEx(date) { const p = planFor(wday(date)); return p ? p.ex.map(exInfo) : []; }
+  function paintEx(idx, info, w) {
+    const n = setsDone(w, info);
+    const hit = document.querySelector('[data-exrow][data-exi="' + idx + '"]'); if (hit) flip(hit, n >= info.mn);
+    document.querySelectorAll('.dot[data-exi="' + idx + '"]').forEach(d => d.setAttribute("aria-pressed", String(+d.dataset.set <= n)));
+  }
+
+  $("view-bugun").addEventListener("click", ev => {
+    const t = ev.target.closest("button"); if (!t) return;
+    if (t.dataset.date) { state.date = t.dataset.date; renderToday(); return; }
+    if (state.readOnly) return;
+    const date = state.date;
+    if (t.dataset.diet) {
+      const d = ensureDay(date); d.diet[t.dataset.diet] = !d.diet[t.dataset.diet]; flip(t, d.diet[t.dataset.diet]); touch(date); updateSummary();
+    } else if (t.dataset.meal) {
+      const d = ensureDay(date), m = PLAN.meals.find(x => x.id === t.dataset.meal);
+      const all = m.items.every((_, i) => d.diet[m.id + ":" + i]);
+      m.items.forEach((_, i) => { d.diet[m.id + ":" + i] = !all; const b = document.querySelector('[data-diet="' + m.id + ":" + i + '"]'); if (b) flip(b, !all); });
+      touch(date); updateSummary();
+    } else if (t.dataset.exi != null) {
+      const idx = +t.dataset.exi, info = currentPlanEx(date)[idx]; if (!info) return;
+      const d = ensureDay(date);
+      const cur = setsDone(d.workout, info);
+      let next;
+      if (t.dataset.set) { const s = +t.dataset.set; next = cur === s ? s - 1 : s; }
+      else next = cur >= info.mn ? 0 : info.mx;
+      d.workout.sets[info.name] = next;
+      if (d.workout.done) delete d.workout.done[info.name];
+      paintEx(idx, info, d.workout); touch(date); updateSummary();
+      if (t.dataset.set && next > cur && next < info.mx) { primeAudio(); startTimer((next + 1) + ". set"); }
+      else if (t.dataset.set && next >= info.mx && $("timer").classList.contains("on")) showTimer(false);
+    } else if (t.dataset.habit) {
+      const d = ensureDay(date), k = t.dataset.habit; d.habits[k] = !d.habits[k]; flip(t, d.habits[k]); touch(date); updateSummary();
+    } else if (t.dataset.wday != null) {
+      const d = ensureDay(date); d.workout.day = t.dataset.wday; touch(date);
+      $("wdays").hidden = true; $("chg").setAttribute("aria-expanded", "false"); renderToday();
+    } else if (t.id === "chg") {
+      if (t.dataset.reset === "1") { const d = ensureDay(date); delete d.workout.day; touch(date); $("wdays").hidden = true; renderToday(); return; }
+      const open = $("wdays").hidden; $("wdays").hidden = !open; t.setAttribute("aria-expanded", String(open));
+      if (open) { const box = $("wdays"), c = box.querySelector('.chip[aria-pressed="true"]'); if (c) box.scrollLeft = c.offsetLeft - (box.clientWidth - c.offsetWidth) / 2; }
+    }
+  });
+  $("view-bugun").addEventListener("input", ev => {
+    const el = ev.target; if (!el.dataset || el.dataset.kg == null || state.readOnly) return;
+    const date = state.date, info = currentPlanEx(date)[+el.dataset.kg]; if (!info) return;
+    const d = ensureDay(date);
+    const v = num(el.value);
+    if (v == null) delete d.workout.kg[info.name]; else d.workout.kg[info.name] = v;
+    touch(date, 700);
+  });
+
+  $("f-date").value = today();
+  $("save").addEventListener("click", () => {
+    if (state.readOnly) return;
+    const e = { date: $("f-date").value || today() };
+    [["weight", "f-weight"], ["waist", "f-waist"], ["chest", "f-chest"], ["shoulder", "f-shoulder"], ["hip", "f-hip"], ["thigh", "f-thigh"]].forEach(([k, id]) => { const v = num($(id).value); if (v != null) e[k] = v; });
+    if (Object.keys(e).length < 2) { toast("En az bir ölçü gir"); $("f-weight").focus(); return; }
+    const entries = (state.progress.entries || []).slice();
+    const i = entries.findIndex(x => x.date === e.date);
+    if (i >= 0) entries[i] = Object.assign({}, entries[i], e); else entries.push(e);
+    entries.sort((a, b) => a.date < b.date ? -1 : 1);
+    state.progress = { entries: entries }; state.progressLoaded = true;
+    queueWrite("progress/log", () => state.progress, 0);
+    ["f-weight", "f-waist", "f-chest", "f-shoulder", "f-hip", "f-thigh"].forEach(id => $(id).value = "");
+    if (document.activeElement) document.activeElement.blur();
+    renderProgress(); toast("Ölçüm kaydedildi");
+  });
+  $("entries").addEventListener("click", ev => {
+    const b = ev.target.closest("[data-del]"); if (!b || state.readOnly) return;
+    if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Emin misin?"; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ""; b.textContent = "Sil"; } }, 3000); return; }
+    state.progress = { entries: (state.progress.entries || []).filter(x => x.date !== b.dataset.del) };
+    queueWrite("progress/log", () => state.progress, 0);
+    renderProgress(); toast("Ölçüm silindi");
+  });
+
+  // ---------- backup (device-only mode) ----------
+  $("backup-copy").addEventListener("click", () => {
+    const txt = JSON.stringify({ app: "cutline", v: 2, days: state.days, progress: state.progress });
+    const ta = $("backup-text");
+    const fallback = () => { ta.value = txt; ta.focus(); ta.select(); toast("Metni seçip kopyala"); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Yedek kopyalandı"), fallback); } catch (e) { fallback(); }
+  });
+  $("backup-load").addEventListener("click", ev => {
+    const b = ev.currentTarget, ta = $("backup-text");
+    let data;
+    try { data = JSON.parse(ta.value); } catch (e) { toast("Yedek metni okunamadı, tamamını yapıştır"); return; }
+    if (!data || (data.app !== "cutline" && data.app !== "kesim-defteri")) { toast("Bu metin bir Cutline yedeği değil"); return; }
+    if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Üzerine yaz?"; setTimeout(() => { b.dataset.armed = ""; b.textContent = "Geri yükle"; }, 3000); return; }
+    b.dataset.armed = ""; b.textContent = "Geri yükle";
+    state.days = data.days || {}; state.progress = data.progress || { entries: [] }; state.progressLoaded = true;
+    LS.set("days", state.days); LS.set("progress", state.progress);
+    ta.value = ""; render(); toast("Yedek geri yüklendi");
+  });
+
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+
+  render();
+  let lastToday = today();
+  setInterval(() => {
+    if (document.hidden) return;
+    const t = today();
+    if (t !== lastToday) { if (state.date === lastToday) state.date = t; lastToday = t; render(); }
+    else if (state.date === t && state.tab === "bugun") render();
+  }, 60000);
+
+  // ---------- account-linked store (inside Claude) ----------
+  (async function () {
+    let d = null;
+    if (window.claude && window.claude.use) { try { d = await window.claude.use("db"); } catch (e) { d = null; } }
+    if (!d) { state.progressLoaded = true; render(); return; }
+    db = d;
+    let first = true;
+    db.collection("days").onSnapshot(snap => {
+      const before = JSON.stringify(state.days);
+      const next = first ? {} : Object.assign({}, state.days);
+      snap.docs.forEach(s => { if (s.exists) next[s.id] = clone(s.data()); });
+      Object.keys(state.days).forEach(k => { if (isDirty("days/" + k)) next[k] = state.days[k]; });
+      first = false;
+      state.days = next;
+      if (JSON.stringify(next) !== before) render(); else $("foot").textContent = "Kayıtların hesabına bağlı, her cihazdan aynı.";
+    }, () => toast("Kayıtlara ulaşılamıyor, sayfayı yenile"));
+    db.doc("progress/log").onSnapshot(s => {
+      if (isDirty("progress/log")) return;
+      const nextP = s.exists ? clone(s.data()) : { entries: [] };
+      const changed = JSON.stringify(nextP) !== JSON.stringify(state.progress) || !state.progressLoaded;
+      state.progress = nextP; state.progressLoaded = true;
+      if (changed) render();
+    }, () => {});
+  })();
+})();
+</script>
+
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
+</body>
+</html>
